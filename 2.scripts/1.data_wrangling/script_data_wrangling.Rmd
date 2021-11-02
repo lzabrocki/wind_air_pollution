@@ -11,7 +11,7 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
@@ -215,9 +215,9 @@ weather_data <-
       "daily_weather_data_paris_2008_2018.txt"
     ),
     header = TRUE,
-    sep = ";",
+    sep = ",",
     stringsAsFactors = FALSE,
-    dec = ","
+    dec = "."
   ) %>%
   rename(
     "date" = "DATE",

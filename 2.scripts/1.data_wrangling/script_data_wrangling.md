@@ -11,7 +11,7 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
@@ -226,9 +226,9 @@ We load and clean weather data:
       <span class='st'>"daily_weather_data_paris_2008_2018.txt"</span>
     <span class='op'>)</span>,
     header <span class='op'>=</span> <span class='cn'>TRUE</span>,
-    sep <span class='op'>=</span> <span class='st'>";"</span>,
+    sep <span class='op'>=</span> <span class='st'>","</span>,
     stringsAsFactors <span class='op'>=</span> <span class='cn'>FALSE</span>,
-    dec <span class='op'>=</span> <span class='st'>","</span>
+    dec <span class='op'>=</span> <span class='st'>"."</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>rename</span><span class='op'>(</span>
     <span class='st'>"date"</span> <span class='op'>=</span> <span class='st'>"DATE"</span>,
@@ -400,8 +400,6 @@ iter 1:	...........
 iter 2:	...........
 iter 3:	...........
 iter 4:	...........
-iter 5:	...........
-iter 6:	...........
 ```
 
 </div>
