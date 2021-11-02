@@ -4,7 +4,7 @@ This repo provides all the necessary R codes to reproduce the analysis of the pa
 
 **The repo is organized as follows:**
 
-* `1.data`: the folder contains the raw datasets, the dataset used for the matching procedure and the matched data.
+* `1.data`: the folder contains the raw datasets, the dataset used for the matching procedure and the matched data. We were not allowed to share the weather data from Météo-France. We therefore added as small amount of noise to the original data. 
 * `2.scripts`: contains all Rmarkdown and .html files to reproduce the analysis.
     * `1.data_wrangling` contains the script to clean and merge the raw datasets.
     * `2.eda` contains the script to carry out an exploratory data analysis.
