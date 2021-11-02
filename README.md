@@ -1,5 +1,7 @@
 # Estimating the Influence of Wind on Air Pollution using a Causal Inference Pipeline
 
+![cover](./3.outputs/graphical_abstract.jpg)
+
 This repo provides all the necessary R codes to reproduce the analysis of the paper entitled "Estimating the Influence of Wind on Air Pollution using a Causal Inference Pipeline". Should you have any questions or find coding errors, please do not hesistate to reach me at leo.zabrocki[at]psemail.eu.
 
 **The repo is organized as follows:**
