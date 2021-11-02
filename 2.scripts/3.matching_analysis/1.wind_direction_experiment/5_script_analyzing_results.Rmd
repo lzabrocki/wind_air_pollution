@@ -1,0 +1,797 @@
+---
+title: "Analyzing Results"
+description: |
+  Comparing days with Wind Blowing from the North-East to Other Directions. Adjusting for calendar indicators and other weather variables.
+author:
+  - name: Léo Zabrocki 
+    url: https://lzabrocki.github.io/
+    affiliation: Paris School of Economics
+    affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
+  - name: Anna Alari 
+    url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
+    affiliation: Sorbonne Université & INSERM
+    affiliation_url: https://www.inserm.fr/
+  - name: Tarik Benmarnhia
+    url: https://profiles.ucsd.edu/tarik.benmarhnia
+    affiliation: UCSD & Scripps Institute
+    affiliation_url: https://benmarhniaresearch.ucsd.edu/
+date: "`r Sys.Date()`"
+output: 
+    distill::distill_article:
+      keep_md: true
+      toc: true
+      toc_depth: 2
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+# code chunk option
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  layout="l-body-outset",
+  dev = "CairoPNG",
+  dpi = 300
+)
+```
+
+In this document, we take great care providing all steps and R codes required to estimate the influence of North-East winds on air pollutants. We compare days where:
+
+* treated units are days where winds blow from the North-East in *t*.
+* control units are day winds blow from other directions in *t*.
+
+We adjust for calendar indicators and weather confouding factors.
+
+**Should you have any questions, need help to reproduce the analysis or find coding errors, please do not hesitate to contact me at leo.zabrocki@psemail.eu**
+
+# Required Packages
+
+To reproduce exactly the `5_script_analyzing_results.html` document, we first need to have installed:
+
+* the [R](https://www.r-project.org/) programming language 
+* [RStudio](https://rstudio.com/), an integrated development environment for R, which will allow you to knit the `5_script_analyzing_results.Rmd` file and interact with the R code chunks
+* the [R Markdown](https://rmarkdown.rstudio.com/) package
+* and the [Distill](https://rstudio.github.io/distill/) package which provides the template for this document. 
+
+Once everything is set up, we have to load the following packages:
+
+```{r}
+# load required packages
+library(knitr) # for creating the R Markdown document
+library(here) # for files paths organization
+library(tidyverse) # for data manipulation and visualization
+library(retrodesign) # for assessing type m and s errors
+library(Cairo) # for printing customed police of graphs
+library(patchwork) # combining plots
+library(DT) # for tables
+```
+
+We finally load our custom `ggplot2` theme for graphs:
+
+```{r}
+# load ggplot custom theme
+source(here::here(
+  "2.scripts",
+  "4.custom_ggplot2_theme",
+  "script_theme_tufte.R"
+))
+# define nice colors
+my_blue <- "#0081a7"
+my_orange <- "#fb8500"
+````
+
+# Preparing the Data
+
+We load the matched data:
+
+```{r}
+# load matched data
+data_matched <-
+  readRDS(here::here("1.data", "6.matched_data", "matched_data.rds"))
+```
+
+# Distribution of the Pair Differences in Concentration between Treated and Control units for each Pollutant
+
+### Computing Pairs Differences in Pollutant Concentrations
+
+We first compute the differences in a pollutant's concentration for each pair over time:
+
+```{r}
+data_matched_wide <- data_matched %>%
+  mutate(is_treated = ifelse(is_treated == TRUE, "treated", "control")) %>%
+  select(
+    is_treated,
+    pair_number,
+    contains("mean_no2"),
+    contains("mean_o3"),
+    contains("mean_pm10"),
+    contains("mean_pm25")
+  ) %>%
+  pivot_longer(
+    cols = -c(pair_number, is_treated),
+    names_to = "variable",
+    values_to = "concentration"
+  ) %>%
+  mutate(
+    pollutant = NA %>%
+      ifelse(str_detect(variable, "no2"), "NO2", .) %>%
+      ifelse(str_detect(variable, "o3"), "O3", .) %>%
+      ifelse(str_detect(variable, "pm10"), "PM10", .) %>%
+      ifelse(str_detect(variable, "pm25"), "PM2.5", .)
+  ) %>%
+  mutate(time = 0 %>%
+           ifelse(str_detect(variable, "lag_1"),-1, .) %>%
+           ifelse(str_detect(variable, "lead_1"), 1, .)) %>%
+  select(-variable) %>%
+  select(pair_number, is_treated, pollutant, time, concentration) %>%
+  pivot_wider(names_from = is_treated, values_from = concentration)
+
+data_pair_difference_pollutant <- data_matched_wide %>%
+  mutate(difference = treated - control) %>%
+  select(-c(treated, control)) 
+````
+
+### Pairs Differences in NO2 Concentrations
+
+Boxplots for NO2:
+
+```{r, fig.width=10, fig.height=5}
+# create the graph for no2
+graph_boxplot_difference_pollutant_no2 <-
+  data_pair_difference_pollutant %>%
+  filter(str_detect(pollutant, "NO2")) %>%
+  ggplot(., aes(x = as.factor(time), y = difference)) +
+  geom_boxplot(colour = my_blue, size = 0.3) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  facet_wrap( ~ pollutant) +
+  ylab("Pair Difference in \nConcentration (µg/m3)") + xlab("Day") +
+  theme_tufte()
+
+# display the graph
+graph_boxplot_difference_pollutant_no2
+
+# save the graph
+ggsave(
+  graph_boxplot_difference_pollutant_no2,
+  filename = here::here(
+    "3.outputs",
+    "2.matching_analysis",
+    "graph_boxplot_difference_pollutant_no2.pdf"
+  ),
+  width = 18,
+  height = 9,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+### Pairs Differences in O3 Concentrations
+
+Boxplots for O3:
+
+```{r, fig.width=10, fig.height=5}
+# create the graph for o3
+graph_boxplot_difference_pollutant_o3 <-
+  data_pair_difference_pollutant %>%
+  filter(str_detect(pollutant, "O3")) %>%
+  ggplot(., aes(x = as.factor(time), y = difference)) +
+  geom_boxplot(colour = my_blue, size = 0.3) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  ylab("Pair Difference in \nConcentration (µg/m3)") + xlab("Day") +
+  theme_tufte()
+
+# display the graph
+graph_boxplot_difference_pollutant_o3
+
+# save the graph
+ggsave(
+  graph_boxplot_difference_pollutant_o3,
+  filename = here::here(
+    "3.outputs",
+    "2.matching_analysis",
+    "graph_boxplot_difference_pollutant_o3.pdf"
+  ),
+  width = 18,
+  height = 9,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+### Pairs Differences in PM10 Concentrations
+
+Boxplots for PM10:
+
+```{r, fig.width=10, fig.height=5}
+# create the graph for pm10
+graph_boxplot_difference_pollutant_pm10 <-
+  data_pair_difference_pollutant %>%
+  filter(str_detect(pollutant, "PM10")) %>%
+  ggplot(., aes(x = as.factor(time), y = difference)) +
+  geom_boxplot(colour = my_blue, size = 0.3) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  facet_wrap( ~ pollutant) +
+  ylab("Pair Difference in \nConcentration (µg/m3)") + xlab("Day") +
+  theme_tufte()
+
+# display the graph
+graph_boxplot_difference_pollutant_pm10
+
+# save the graph
+ggsave(
+  graph_boxplot_difference_pollutant_pm10,
+  filename = here::here(
+    "3.outputs",
+    "2.matching_analysis",
+    "graph_boxplot_difference_pollutant_pm10.pdf"
+  ),
+  width = 18,
+  height = 9,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+
+### Pairs Differences in PM2.5 Concentrations
+
+Boxplots for PM2.5:
+
+```{r, fig.width=10, fig.height=5}
+# create the graph for pm10
+graph_boxplot_difference_pollutant_pm25 <-
+  data_pair_difference_pollutant %>%
+  filter(str_detect(pollutant, "PM2.5")) %>%
+  ggplot(., aes(x = as.factor(time), y = difference)) +
+  geom_boxplot(colour = my_blue, size = 0.3) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  facet_wrap( ~ pollutant) +
+  ylab("Pair Difference in \nConcentration (µg/m3)") + xlab("Day") +
+  theme_tufte()
+
+# display the graph
+graph_boxplot_difference_pollutant_pm25
+
+# save the graph
+ggsave(
+  graph_boxplot_difference_pollutant_pm25,
+  filename = here::here(
+    "3.outputs",
+    "2.matching_analysis",
+    "graph_boxplot_difference_pollutant_pm25.pdf"
+  ),
+  width = 18,
+  height = 9,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+#  Neymanian Inference: Computing 99% and 95% Confidence Intervals for the Average Treatment Effects
+
+We compute confidence intervals for the average treatement (ATE) of North-East winds using Neyman's approach. We use the formula for the standard error of pair randomized experiment found in Imbens and Rubin (2015).
+
+```{r}
+# we first compute the average treatment effects for each pollutant and day
+data_pair_mean_difference <- data_pair_difference_pollutant %>%
+  filter(pollutant != "PM2.5") %>%
+  group_by(pollutant, time) %>%
+  summarise(mean_difference = mean(difference)) %>%
+  ungroup()
+
+# we store the number of pairs
+n_pair <- nrow(data_matched) / 2
+
+# compute the standard error
+data_se_neyman_pair <-
+  left_join(
+    data_pair_difference_pollutant,
+    data_pair_mean_difference,
+    by = c("pollutant", "time")
+  ) %>%
+  mutate(squared_difference = (difference - mean_difference) ^ 2) %>%
+  group_by(pollutant, time) %>%
+  summarise(standard_error = sqrt(1 / (n_pair * (n_pair - 1)) * sum(squared_difference))) %>%
+  select(pollutant, time, standard_error) %>%
+  ungroup()
+
+# merge the average treatment effect data witht the standard error data
+data_neyman <-
+  left_join(data_pair_mean_difference,
+            data_se_neyman_pair,
+            by = c("pollutant", "time")) %>%
+# compute the 95% and 99% confidence intervals
+  mutate(
+    upper_bound_95 = mean_difference + (-qnorm((1 - 0.95) / 2) * standard_error),
+    lower_bound_95 = mean_difference - (-qnorm((1 - 0.95) / 2) * standard_error),
+    upper_bound_99 = mean_difference + (-qnorm((1 - 0.99) / 2) * standard_error),
+    lower_bound_99 = mean_difference - (-qnorm((1 - 0.99) / 2) * standard_error)
+  )
+``` 
+
+We plot below the point estimates for the ATE and the associated 95% and 99% confidence intervals:
+
+```{r, fig.width=16, fig.height=5}
+# create an indicator to alternate shading of confidence intervals
+data_neyman <- data_neyman %>%
+  arrange(pollutant, time) %>%
+  mutate(stripe = ifelse((time %% 2) == 0, "Grey", "White")) %>%
+  ungroup()
+
+# make the graph
+graph_ci <-
+  ggplot(data_neyman,
+         aes(x = as.factor(time), y = mean_difference)) +
+  geom_rect(
+    aes(fill = stripe),
+    xmin = as.numeric(as.factor(data_neyman$time)) - 0.42,
+    xmax = as.numeric(as.factor(data_neyman$time)) + 0.42,
+    ymin = -Inf,
+    ymax = Inf,
+    color = NA,
+    alpha = 0.4
+  ) +
+  geom_hline(yintercept = 0,
+             color = "black",
+             size = 0.3) +
+  geom_vline(xintercept = "0",
+             color = "black",
+             size = 0.3) +
+  geom_pointrange(
+    aes(
+      x = as.factor(time),
+      y = mean_difference,
+      ymin = lower_bound_95 ,
+      ymax = upper_bound_95
+    ),
+    colour = my_blue,
+    lwd = 0.8
+  ) +
+  geom_pointrange(
+    aes(
+      x = as.factor(time),
+      y = mean_difference,
+      ymin = lower_bound_99 ,
+      ymax = upper_bound_99
+    ),
+    colour = my_blue,
+    lwd = 0.4
+  ) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  facet_wrap( ~ pollutant, ncol = 4) +
+  scale_fill_manual(values = c('gray96', NA)) +
+  guides(fill = FALSE) +
+  ylab("Average Increase in\n Concentrations (µg/m³)") + xlab("Day") +
+  theme_tufte() +
+  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")))
+
+
+# print the graph
+graph_ci
+
+# save the graph
+ggsave(
+  graph_ci,
+  filename = here::here("3.outputs", "2.matching_analysis", "graph_ci.pdf"),
+  width = 20,
+  height = 8,
+  units = "cm",
+  device = cairo_pdf
+)
+```
+
+We display below the table with the point estimates and the 95% and 99% confidence intervals:
+
+```{r, echo = FALSE}
+data_neyman %>%
+  select(pollutant,
+         time,
+         mean_difference,
+         lower_bound_95,
+         upper_bound_95,
+         lower_bound_99,
+         upper_bound_99) %>%
+  mutate_at(vars(mean_difference:upper_bound_99), ~ round(., 1)) %>%
+  rename(
+    "Pollutant" = pollutant,
+    "Time" = time,
+    "Point Estimate" = mean_difference,
+    "Lower Bound of the 95% Fisherian Interval" = lower_bound_95,
+    "Upper Bound of the 95% Fisherian Interval" = upper_bound_95,
+    "Lower Bound of the 99% Confidence Interval" = lower_bound_99,
+    "Upper Bound of the 99% Confidence Interval" = upper_bound_99
+  ) %>%
+  datatable(.)
+````
+
+We can finally check if there is also an effect on North-East winds on PM2.5 concentrations. One issue is that Paris did not have measuring stations for background PM2.5 concentrations from 2009-09-22 to 2010-06-23, that is to say 274 days. We did not impute these missing concentrations but can nonetheless assess if the North-East winds influence the observed pollutant concentrations. We proceed as before but only work with pairs of days without missing PM2.5 recordings:
+
+```{r}
+# we first only select pm2.5 pair differences
+data_pair_difference_pollutant_pm25 <- data_pair_difference_pollutant %>%
+  filter(pollutant == "PM2.5")
+
+# we then find pairs with missing PM2.5 concentrations
+pairs_to_remove <- data_pair_difference_pollutant_pm25 %>%
+  filter(is.na(difference)) %>% 
+  distinct(pair_number) %>%
+  pull(pair_number)
+
+# we remove those pairs
+data_pair_difference_pollutant_pm25 <- data_pair_difference_pollutant_pm25 %>%
+  filter(!(pair_number %in% pairs_to_remove))
+
+# we compute the average treatment effects for pm2.5 and by day
+data_pair_mean_difference_pm25 <-  data_pair_difference_pollutant_pm25 %>%
+  group_by(time) %>%
+  summarise(mean_difference = mean(difference, na.rm = TRUE)) %>%
+  ungroup()
+
+# we store the number of pairs
+n_pair <- length(unique(data_pair_difference_pollutant_pm25$pair_number))
+
+# we compute the standard error
+data_se_neyman_pair_pm25 <-
+  left_join(
+    data_pair_difference_pollutant_pm25,
+    data_pair_mean_difference_pm25,
+    by = c("time")
+  ) %>%
+  mutate(squared_difference = (difference - mean_difference) ^ 2) %>%
+  group_by(time) %>%
+  summarise(standard_error = sqrt(1 / (n_pair * (n_pair - 1)) * sum(squared_difference))) %>%
+  select(time, standard_error) %>%
+  ungroup()
+
+# merge the average treatment effect data witht the standard error data
+data_neyman_pm25 <-
+  left_join(data_pair_mean_difference_pm25,
+            data_se_neyman_pair_pm25,
+            by = c("time")) %>%
+# compute the 95% and 99% confidence intervals
+  mutate(
+    upper_bound_95 = mean_difference + (-qnorm((1 - 0.95) / 2) * standard_error),
+    lower_bound_95 = mean_difference - (-qnorm((1 - 0.95) / 2) * standard_error),
+    upper_bound_99 = mean_difference + (-qnorm((1 - 0.99) / 2) * standard_error),
+    lower_bound_99 = mean_difference - (-qnorm((1 - 0.99) / 2) * standard_error)
+  )
+``` 
+
+We display below the estimates for the ATE and the associated 95% and 99% confidence intervals:
+
+```{r, echo = FALSE}
+data_neyman_pm25 %>%
+  select(
+    time,
+    mean_difference,
+    lower_bound_95,
+    upper_bound_95,
+    lower_bound_99,
+    upper_bound_99
+  ) %>%
+  mutate_at(vars(mean_difference:upper_bound_99), ~ round(., 1)) %>%
+  rename(
+    "Time" = time,
+    "Point Estimate" = mean_difference,
+    "Lower Bound of the 95% Confidence Interval" = lower_bound_95,
+    "Upper Bound of the 95% Confidence Interval" = upper_bound_95,
+    "Lower Bound of the 99% Confidence Interval" = lower_bound_99,
+    "Upper Bound of the 99% Confidence Interval" = upper_bound_99
+  ) %>%
+  datatable(.)
+````
+
+
+# Sensitivity Analysis
+
+### Are results on PM$_{10}$ sensitive to hidden bias?
+
+To assess whether the effects of North-East winds on PM$_{10}$ concentrations could be due to hidden bias, we implement the studentized sensitivity analysis for the ATE developed by Colin B. Fogarty (2019). We first load the relevant functions:
+
+```{r}
+# load fogarty's studentized Sensitivity Analysis functions
+# retrieved from http://www.mit.edu/~cfogarty/StudentizedSensitivity.R
+
+#' StudentizedSensitivity
+#'Function to perform a Studentized Sensitivity analysis on the sample average treatment
+#'effect in a paired observational study
+#'
+#' @param PairedDiff: Vector of treated-minus-control paired differences.
+#' @param null: Value of the sample average treatment effect under the null.
+#' @param alpha: Desired Type I error rate.
+#' @param alternative: Can be "less", "greater", or "two.sided".
+#' @param Gamma: Vector of values for Gamma at which to perform the sensitivity
+#'  analysis.
+#' @param nperm: Number of permutations to perform permutation test.
+#' @param Changepoint: If true, function returns the maximal Gamma for which the
+#' test rejects at level alpha.
+#' @param SensitivityInterval: If true, function returns (100-alpha) sensitivity
+#' intervals. They will be one-sided if the alternative is less than or greater than,
+#' and two-sided if the alternative is two-sided.
+#'
+#' @return Gamma: Vector of Gammas for which the sensitivity analysis was performed.
+#' @return pval: P-values for each value of Gamma.
+#' @return GammaPval: Matrix combining Gamma and pval.
+#' @return Changepoint: Maximal Gamma for which the test rejected at level alpha.
+#' @return SensitivityInterval: Upper and lower bounds for 100(1-alpha) sensitivity
+#' intervals for each value of Gamma.
+#' @export
+
+
+StudentizedSensitivity = function(PairedDiff, null = 0, alpha = 0.05, alternative = "greater", Gamma = 1, nperm = 50000, Changepoint = T, SensitivityInterval = T)
+{
+   if(any(Gamma < 1))
+   {
+   	stop("Values for Gamma must be >= 1")
+   }
+   if(alternative!="less" & alternative!= "greater" & alternative != "two.sided")
+   {
+   	stop("Values for alternative are `less', `greater', or `two.sided'")
+   }
+   if(length(null) > 1)
+   {
+   	stop("Value under the null must be a scalar")
+   }
+      if(alpha < 0 | alpha > 0.5)
+   {
+   	stop("alpha must be between 0 and 0.5")
+      }
+
+  PairedDifftrue <- PairedDiff
+  alphatrue <- alpha
+  I <- length(PairedDiff)
+  Adjust <- PairedDiff - null
+
+  if(alternative == "less")
+  {
+  	Adjust <- -Adjust
+  }
+  if(alternative == "two.sided")
+  {
+  	alpha <- alphatrue/2
+
+  	if(mean(Adjust) < 0)
+  	{
+  		Adjust <- -Adjust
+  	}
+  }
+
+  pval <- rep(0, length(Gamma))
+
+  for(i in 1:length(Gamma))
+
+  {
+  D <- (Adjust) - (Gamma[i]-1)/(1+Gamma[i])*abs(Adjust)
+  obs <- mean(D)/(sd(D)/sqrt(I))
+  Adjmat <- matrix(abs(Adjust), I, nperm)
+  Zmat <- matrix(runif(I*nperm) < Gamma[i]/(1+Gamma[i]), I, nperm)
+  Dmat <- (2*Zmat-1)*(Adjmat) - (Gamma[i]-1)/(1+Gamma[i])*Adjmat
+  perm <- colMeans(Dmat)/(sqrt(colVars(Dmat)/I))
+  pval[i] <- (1+sum(perm>=obs))/(nperm + 1)
+  }
+  pvalret = pval
+  if(alternative == "two.sided")
+  {
+    pvalret = 2*pval
+  }
+  Pmatrix <- cbind(Gamma, pvalret)
+  colnames(Pmatrix) <- c("Gamma", "P-value")
+
+  if(Changepoint == T)
+  {
+  	proceed <- StudentizedSensitivity(PairedDifftrue, null, alphatrue, alternative, Gamma=1, nperm,
+  	                                  Changepoint = F, SensitivityInterval = F)$pval <= alphatrue
+
+  	change <- 1
+
+  	if(proceed)
+  	{
+  		change <- uniroot(StudentizedChangepoint, interval = c(1, 30), PairedDiff = PairedDifftrue, null = null,
+  		                  alpha = alphatrue, alternative = alternative, nperm = nperm,
+  		                  extendInt = "upX")$root
+  	}
+  }
+
+  if(SensitivityInterval == T)
+  	{
+  		lb = rep(-Inf, length(Gamma))
+  		ub = rep(Inf, length(Gamma))
+  		for(i in 1:length(Gamma))
+  		{
+  		  # Warm Starts
+  		UB = uniroot(BoundFinder, PairedDifftrue, Gamma[i],
+  		             interval = c(mean(PairedDifftrue), mean(PairedDifftrue)+4*sd(PairedDifftrue)/sqrt(I)), extendInt = "yes")$root
+  		LB = -uniroot(BoundFinder, -PairedDifftrue, Gamma[i],
+  		              interval = c(-mean(PairedDifftrue)-4*sd(PairedDifftrue)/sqrt(I), -mean(PairedDifftrue)), extendInt = "yes")$root
+
+  		SUB = Inf
+  		SLB = -Inf
+
+  		if(alternative == "greater")
+  		{
+  			SLB = uniroot(StudentizedSI, interval = c(UB-4*sd(PairedDifftrue)/sqrt(I), UB), extendInt = "yes",
+  			              Gamma = Gamma[i], PairedDiff=PairedDifftrue, alternative = "greater", alpha = alpha, nperm = nperm)$root
+  		}
+
+  		if(alternative == "less")
+  		{
+  			SUB = uniroot(StudentizedSI, interval = c(LB, LB + 4*sd(PairedDifftrue)/sqrt(I)), extendInt = "yes",
+  			              Gamma = Gamma[i], PairedDiff=PairedDifftrue, alternative = "less", alpha = alpha, nperm = nperm)$root
+  		}
+
+  		if(alternative == "two.sided")
+  		{
+  		 SLB = uniroot(StudentizedSI, interval = c(UB-4*sd(PairedDifftrue)/sqrt(I), UB), extendInt = "yes",
+  		               Gamma = Gamma[i], PairedDiff=PairedDifftrue, alternative = "greater", alpha = alpha, nperm = nperm)$root
+		   SUB = uniroot(StudentizedSI, interval = c(LB, LB+4*sd(PairedDifftrue)/sqrt(I)), extendInt = "yes",
+		                 Gamma = Gamma[i], PairedDiff=PairedDifftrue, alternative = "less", alpha = alpha, nperm = nperm)$root
+  		}
+
+  		lb[i] = SLB
+  		ub[i] = SUB
+  		}
+
+  	SImat = cbind(Gamma, lb, ub)
+  	colnames(SImat) = c("Gamma", "Lower Bound", "Upper Bound")
+  	}
+  	if(Changepoint == F & SensitivityInterval == F)
+  	{
+  		return(list(Gamma=Gamma, pval = pvalret, GammaPval = Pmatrix))
+  	}
+  	if(Changepoint == F & SensitivityInterval == T)
+  	{
+  		return(list(Gamma = Gamma, pval = pvalret, GammaPval = Pmatrix, SensitivityInterval = SImat))
+  	}
+  	if(Changepoint == T & SensitivityInterval == F)
+  	{
+  		return(list(Gamma = Gamma, pval = pvalret, GammaPval = Pmatrix, Changepoint = change))
+  	}
+  	if(Changepoint == T & SensitivityInterval == T)
+  	{
+  		return(list(Gamma = Gamma, pval = pvalret, GammaPval = Pmatrix, Changepoint = change,
+  		            SensitivityInterval = SImat))
+  	}
+
+}
+
+####These are auxiliary functions used for root finding and for calculating columnwise variances in StudentizedSensitivity
+StudentizedChangepoint = function(Gamma, PairedDiff, null, alternative, alpha, nperm)
+{
+  alphachange = alpha
+  StudentizedSensitivity(PairedDiff, null, alpha, alternative, Gamma, nperm, Changepoint = F, SensitivityInterval = F)$pval - alphachange
+}
+
+StudentizedSI = function(null,  Gamma, PairedDiff,  alternative, alpha, nperm)
+{
+	StudentizedSensitivity(PairedDiff, null, alpha, alternative, Gamma, nperm, Changepoint = F, SensitivityInterval = F)$pval - alpha
+}
+
+BoundFinder = function(null,  PairedDiff, Gamma)
+{
+	mean(PairedDiff - null - (Gamma-1)/(1+Gamma)*abs(PairedDiff-null))
+}
+
+colVars <- function(x) {
+  N = nrow(x)
+  (colSums(x^2) - colSums(x)^2/N) / (N-1)
+}
+```
+
+We select the pair differences for PM$_{10}$ concentrations in $t$ and run the function for $\Gamma$=2:
+
+```{r}
+# we select the relevant pair differences
+PairedDiff <- data_pair_difference_pollutant %>%
+  filter(pollutant == "PM10" & time == 0) %>%
+  pull(difference)
+
+# we run the function
+StudentizedSensitivity(
+  PairedDiff,
+  null = 0,
+  alpha = 0.05,
+  alternative = "two.sided",
+  Gamma = 2,
+  nperm = 50000,
+  Changepoint = T,
+  SensitivityInterval = T
+)$SensitivityInterval %>%
+  as_tibble() %>%
+  mutate_all(~ round(., 2)) %>%
+  datatable(.)
+```
+
+We then implement the same procedure but for concentrations in $t+1$:
+
+```{r}
+# we select the relevant pair differences
+PairedDiff <- data_pair_difference_pollutant %>%
+  filter(pollutant == "PM10" & time == 1) %>%
+  pull(difference)
+
+# we run the function
+StudentizedSensitivity(
+  PairedDiff,
+  null = 0,
+  alpha = 0.05,
+  alternative = "two.sided",
+  Gamma = 2,
+  nperm = 50000,
+  Changepoint = T,
+  SensitivityInterval = T
+)$SensitivityInterval %>%
+  as_tibble() %>%
+  mutate_all( ~ round(., 2)) %>%
+  datatable(.)
+```
+
+### Does pairing improve precision?
+
+To check that our pair matching procedure improves precsision, we compare the estimate of the variance for a pair experiment with the one of a complete experiment (the formula can be found in Imbens & Rubin 2015's textbook):
+
+```{r}
+# compute estimates of the sampling variability
+# for a complete experiment
+sampling_variability_complete <- data_matched %>%
+  select(is_treated, mean_no2, mean_o3, mean_pm10) %>%
+  pivot_longer(
+    cols = c(mean_no2:mean_pm10),
+    names_to = "pollutant",
+    values_to = "concentration"
+  ) %>%
+  group_by(pollutant, is_treated) %>%
+  mutate(
+    n_obs = n(),
+    average_concentration = mean(concentration),
+    squared_difference = (concentration - average_concentration) ^
+      2,
+    variance_group = sum(squared_difference) / (n_obs - 1)
+  ) %>%
+  summarise(variance_component = mean(variance_group / n_obs)) %>%
+  group_by(pollutant) %>%
+  summarise(
+    variance = sum(variance_component),
+    standard_error_complete = sqrt(variance)
+  ) %>%
+  select(-variance) %>%
+  mutate(
+    pollutant = case_when(
+      pollutant == "mean_no2" ~ "NO2",
+      pollutant == "mean_o3" ~ "O3",
+      pollutant == "mean_pm10" ~ "PM10"
+    )
+  )
+
+# estimates of the sampling variability for a pair experiment
+sampling_variability_pair <- data_se_neyman_pair %>%
+  filter(time == 0 & pollutant != "PM2.5") %>%
+  select(-time) %>%
+  rename(standard_error_pair = standard_error)
+
+# merge the two datasets and display results
+left_join(sampling_variability_pair,
+          sampling_variability_complete,
+          by = c("pollutant")) %>%
+  mutate(
+    "Precision Improvement (%)" = (standard_error_pair - standard_error_complete) /
+      standard_error_complete * 100
+  ) %>%
+  mutate_at(vars(standard_error_pair, standard_error_complete), ~ round(., 2)) %>%
+  mutate(`Precision Improvement (%)` = round(`Precision Improvement (%)`, 0)) %>%
+  rename(
+    "Pollutant" = pollutant,
+    "S.E Pair Experiment" = standard_error_pair,
+    "S.E Complete Experiment" = standard_error_complete
+  ) %>%
+  datatable(.)
+```
+
+
+
+
+

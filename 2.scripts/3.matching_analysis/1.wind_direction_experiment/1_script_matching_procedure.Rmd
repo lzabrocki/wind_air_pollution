@@ -1,0 +1,357 @@
+---
+title: "Matching Procedure"
+description: |
+  Comparing days with Wind Blowing from the North-East to Other Directions. Adjusting for calendar indicators and other weather variables.
+author:
+  - name: Léo Zabrocki 
+    url: https://lzabrocki.github.io/
+    affiliation: Paris School of Economics
+    affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
+  - name: Anna Alari 
+    url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
+    affiliation: Sorbonne Université & INSERM
+    affiliation_url: https://www.inserm.fr/
+  - name: Tarik Benmarnhia
+    url: https://profiles.ucsd.edu/tarik.benmarhnia
+    affiliation: UCSD & Scripps Institute
+    affiliation_url: https://benmarhniaresearch.ucsd.edu/
+date: "`r Sys.Date()`"
+output: 
+    distill::distill_article:
+      keep_md: true
+      toc: true
+      toc_depth: 2
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+# code chunk option
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  layout="l-body-outset",
+  dev = "CairoPNG",
+  dpi = 300
+)
+```
+
+In this document, we provide all steps required to reproduce our matching procedure. We compare days where:
+
+* treated units are days where winds blow from the North-East in *t*.
+* control units are day winds blow from other directions in *t*.
+
+We adjust for calendar indicators and weather confouding factors.
+
+**Should you have any questions, need help to reproduce the analysis or find coding errors, please do not hesitate to contact me at leo.zabrocki@psemail.eu**
+
+# Required Packages
+
+To reproduce exactly the `script_matching_procedure.html` document, we first need to have installed:
+
+* the [R](https://www.r-project.org/) programming language on your computer 
+* [RStudio](https://rstudio.com/), an integrated development environment for R, which will allow you to knit the `script_matching_procedure.Rmd` file and interact with the R code chunks
+* the [R Markdown](https://rmarkdown.rstudio.com/) package
+* and the [Distill](https://rstudio.github.io/distill/) package which provides the template of this document. 
+
+Once everything is set up, we have to load the following packages:
+
+```{r}
+# load required packages
+library(knitr) # for creating the R Markdown document
+library(here) # for files paths organization
+library(tidyverse) # for data manipulation and visualization
+library(Rcpp) # for running the matching algorithm
+library(optmatch) # for matching pairs
+library(igraph) # for pair matching via bipartite maximal weighted matching
+```
+
+We load our custom `ggplot2` theme for graphs:
+
+```{r}
+# load ggplot custom theme
+source(here::here(
+  "2.scripts",
+  "4.custom_ggplot2_theme",
+  "script_theme_tufte.R"
+))
+# define nice colors
+my_blue <- "#0081a7"
+my_orange <- "#fb8500"
+```
+
+We also have to load the `script_time_series_matching_function.R` located in the **0.script_matching_algorithm** folder and which provides the functions used for matching time series:
+
+```{r, include = TRUE}
+# load matching functions
+source(
+  here::here(
+    "2.scripts",
+    "3.matching_analysis",
+    "0.script_matching_algorithm",
+    "script_time_series_matching_function.R"
+  )
+)
+```
+
+# Preparing the Data for Matching
+ 
+### Selecting and Creating Relevant Variables
+
+First, we load the data:
+
+```{r}
+# load data
+data <-
+  readRDS(here::here("1.data", "5.data_for_analysis", "data_for_analysis.RDS")) %>%
+  # drop wind direction variable as we use instead wind direction categories
+  select(-wind_direction)
+```
+
+For each covariate, we create the first daily lags and leads and create a new dataframe called `processed_data`:
+
+```{r}
+# create first daily lead for each variable
+data_leads <- data %>%
+  select(date, mean_no2:wind_direction_categories) %>%
+  mutate_at(vars(-date), ~  lead(., n = 1, order_by = date)) %>%
+  rename_at(vars(-date), function(x)
+    paste0(x, "_lead_", 1))
+
+# create first daily lag for each variable
+data_lags <- data %>%
+  select(date, mean_no2:wind_direction_categories) %>%
+  mutate_at(vars(-date), ~  lag(., n = 1, order_by = date)) %>%
+  rename_at(vars(-date), function(x)
+    paste0(x, "_lag_", 1))
+
+# create processed_data
+processed_data <- left_join(data, data_lags, by = "date") %>%
+  left_join(., data_leads, by = "date")
+```
+
+We can now define the hypothetical experiment that we would like to investigate.
+
+### Creating Potential Experiments
+
+We defined our potential experiments such that:
+
+* treated units are days where winds blow from the North-East in *t*.
+* control units are day winds blow from other directions in *t*.
+
+Below are the required steps to select the corresponding treated and control units whose observations are stored in the matching_data:
+
+```{r}
+# construct treatment assignment variable
+processed_data <- processed_data %>%
+  mutate(is_treated = ifelse(wind_direction_categories == "North-East", TRUE, FALSE))
+
+# remove the days for which assignment is undefined
+matching_data = processed_data[!is.na(processed_data$is_treated),]
+
+# susbet treated and control units
+treated_units = subset(matching_data, is_treated)
+control_units = subset(matching_data,!is_treated)
+N_treated = nrow(treated_units)
+N_control = nrow(control_units)
+```
+
+There are `r N_treated` treated units and  `r N_control` control units. We display the distributionf of treated and control units through time:
+
+```{r, fig.width=10, fig.height=4}
+# make stripes graph
+graph_stripes_wd_experiment <- matching_data %>%
+  mutate(is_treated = ifelse(is_treated == "TRUE", "Treated", "Control")) %>%
+  ggplot(., aes(x = date, y = 1, fill = is_treated)) +
+  geom_tile() +
+  scale_x_date(breaks = scales::pretty_breaks(n = 10)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(name = "Daily Observations:", values = c(my_blue, my_orange)) +
+  xlab("Date") +
+  theme_tufte() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+# display the graph
+graph_stripes_wd_experiment
+
+# save the graph
+ggsave(
+  graph_stripes_wd_experiment,
+  filename = here::here(
+    "3.outputs",
+    "2.matching_analysis",
+    "graph_stripes_wd_experiment.pdf"
+  ),
+  width = 30,
+  height = 10,
+  units = "cm",
+  device = cairo_pdf
+)
+```
+
+We save the `matching_data` :
+
+```{r}
+# save the matching data
+saveRDS(matching_data,
+        here::here("1.data", "6.matched_data", "matching_data.Rds"))
+```
+
+# Matching Procedure
+
+### Defining Thresholds for Matching Covariates
+
+Below is the code to define the relevant thresholds:
+
+```{r}
+# we create the scaling list as it is needed for running the algorithm
+# but we do not use it
+
+scaling =  rep(list(1), ncol(matching_data))
+names(scaling) = colnames(matching_data)
+
+# instead, we manually defined the threshold for each covariate
+thresholds = rep(list(Inf), ncol(matching_data))
+names(thresholds) = colnames(matching_data)
+
+# threshold for julian date
+thresholds$julian_date = 60
+
+# threshold for weekday
+thresholds$weekday = 0
+
+# threshold for holidays
+thresholds$holidays_dummy = 0
+
+# threshold for bank days
+thresholds$bank_day_dummy = 0
+
+# thresholds for average temperature
+thresholds$temperature_average = 5
+
+# threshold for wind speed
+thresholds$wind_speed = 1.6
+
+# threshold for wind direction categories lag 1
+thresholds$wind_direction_categories_lag_1 = 0
+
+# threshold for rainfall duration
+thresholds$rainfall_duration = 0
+```
+
+### Running the Matching Procedure
+
+We compute discrepancy matrix and run the matching algorithm:
+
+```{r}
+# first we compute the discrepancy matrix
+discrepancies = discrepancyMatrix(treated_units, control_units, thresholds, scaling)
+
+# convert matching data to data.frame
+matching_data <- as.data.frame(matching_data)
+
+rownames(discrepancies) = format(matching_data$date[which(matching_data$is_treated)], "%Y-%m-%d")
+colnames(discrepancies) = format(matching_data$date[which(!matching_data$is_treated)], "%Y-%m-%d")
+rownames(matching_data) = matching_data$date
+
+# run the fullmatch algorithm
+matched_groups = fullmatch(
+  discrepancies,
+  data = matching_data,
+  remove.unmatchables = TRUE,
+  max.controls = 1
+)
+
+# get list of matched  treated-control groups
+groups_labels = unique(matched_groups[!is.na(matched_groups)])
+groups_list = list()
+for (i in 1:length(groups_labels)) {
+  IDs = names(matched_groups)[(matched_groups == groups_labels[i])]
+  groups_list[[i]] = as.Date(IDs[!is.na(IDs)])
+}
+```
+
+For somes cases, several controls units were matched to a treatment unit. We use the `igraph` package to force pair matching via bipartite maximal weighted matching. Below is the required code:
+
+```{r}
+# we build a bipartite graph with one layer of treated nodes, and another layer of control nodes.
+# the nodes are labeled by integers from 1 to (N_treated + N_control)
+# by convention, the first N_treated nodes correspond to the treated units, and the remaining N_control
+# nodes correspond to the control units.
+
+# build pseudo-adjacency matrix: edge if and only if match is admissible
+# NB: this matrix is rectangular so it is not per say the adjacendy matrix of the graph
+# (for this bipartite graph, the adjacency matrix had four blocks: the upper-left block of size
+# N_treated by N_treated filled with 0's, bottom-right block of size N_control by N_control filled with 0's,
+# top-right block of size N_treated by N_control corresponding to adj defined below, and bottom-left block
+# of size N_control by N_treated corresponding to the transpose of adj)
+adj = (discrepancies < Inf)
+
+# extract endpoints of edges
+edges_mat = which(adj, arr.ind = TRUE)
+
+# build weights, listed in the same order as the edges (we use a decreasing function x --> 1/(1+x) to
+# have weights inversely proportional to the discrepancies, since maximum.bipartite.matching
+# maximizes the total weight and we want to minimize the discrepancy)
+weights = 1 / (1 + sapply(1:nrow(edges_mat), function(i)
+  discrepancies[edges_mat[i, 1], edges_mat[i, 2]]))
+
+# format list of edges (encoded as a vector resulting from concatenating the end points of each edge)
+# i.e c(edge1_endpoint1, edge1_endpoint2, edge2_endpoint1, edge2_endpoint1, edge3_endpoint1, etc...)
+edges_mat[, "col"] = edges_mat[, "col"] + N_treated
+edges_vector = c(t(edges_mat))
+
+# NB: by convention, the first N_treated nodes correspond to the treated units, and the remaining N_control
+# nodes correspond to the control units (hence the "+ N_treated" to shift the labels of the control nodes)
+
+# build the graph from the list of edges
+BG = make_bipartite_graph(c(rep(TRUE, N_treated), rep(FALSE, N_control)), edges = edges_vector)
+
+# find the maximal weighted matching
+MBM = maximum.bipartite.matching(BG, weights = weights)
+
+# list the dates of the matched pairs
+pairs_list = list()
+N_matched = 0
+for (i in 1:N_treated) {
+  if (!is.na(MBM$matching[i])) {
+    N_matched = N_matched + 1
+    pairs_list[[N_matched]] = c(treated_units$date[i], control_units$date[MBM$matching[i] -
+                                                                            N_treated])
+  }
+}
+
+# transform the list of matched pairs to a dataframe
+matched_pairs <- enframe(pairs_list) %>%
+  unnest(cols = "value") %>%
+  rename(pair_number = name,
+         date = value)
+```
+
+The hypothetical experiment we set up had `r N_treated` treated units and `r N_control` control units. The matching procedure results in `r N_matched` matched treated units.
+
+We finally merge the `matched_pairs` with the `matching_matching_data` to retrieve covariates values for the matched pairs and save the data:
+
+```{r}
+# select the matched data for the analysis
+final_data <- left_join(matched_pairs, matching_data, by = "date")
+
+# save the matched data
+saveRDS(final_data,
+        here::here("1.data", "6.matched_data", "matched_data.Rds"))
+```
+
+
+
+
+

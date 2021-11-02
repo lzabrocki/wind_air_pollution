@@ -1,0 +1,426 @@
+---
+title: "Data Wrangling"
+description: |
+  Cleaning and Merging Air Pollution, Weather and Calendar Datasets.
+author:
+  - name: Léo Zabrocki 
+    url: https://lzabrocki.github.io/
+    affiliation: Paris School of Economics
+    affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
+  - name: Anna Alari 
+    url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
+    affiliation: Sorbonne Université & INSERM
+    affiliation_url: https://www.inserm.fr/
+  - name: Tarik Benmarnhia
+    url: https://profiles.ucsd.edu/tarik.benmarhnia
+    affiliation: UCSD & Scripps Institute
+    affiliation_url: https://benmarhniaresearch.ucsd.edu/
+date: "`r Sys.Date()`"
+output: 
+    distill::distill_article:
+      keep_md: true
+      toc: true
+      toc_depth: 2
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+# code chunk option
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  layout="l-body-outset",
+  dev = "CairoPNG",
+  dpi = 300
+)
+```
+
+# Required Packages
+
+We load the required packages:
+
+```{r}
+# load required packages
+library(here) # for files paths organization
+library(tidyverse) # for data manipulation and visualization
+library(lubridate) # for manipulating date variables
+library(missRanger) # for missing values imputation
+library(Cairo) # for printing custom police of graphs
+```
+
+# Cleaning Air Pollution Data
+
+We load and clean NO$_{2}$ data:
+
+```{r}
+# clean no2 data
+data_no2 <-
+  data.table::fread(
+    here::here(
+      "1.data",
+      "1.air_pollutants_data",
+      "20080101_20200901-NO2_auto.csv"
+    ),
+    check.names = TRUE
+  ) %>%
+  select(date, heure, PA01H, PA04C, PA06, PA07, PA12, PA13, PA15L, PA18) %>%
+  # drop first line
+  slice(-1) %>%
+  # paste the elements of date together
+  mutate(date = paste(date, heure, sep = "/")) %>%
+  # convert to date
+  mutate(date = lubridate::dmy_h(date)) %>%
+  select(-heure) %>%
+  rename_all( ~ tolower(.)) %>%
+  mutate_at(vars(-date), ~ as.numeric(.)) %>%
+  filter(date > "2008-01-01 00:00:00" &
+           date <= "2019-01-01 00:00:00")
+
+# select relevant measuring stations
+data_no2 <- data_no2 %>%
+  select(date, pa07, pa12, pa13, pa18) %>%
+  rename_at(vars(-date), ~ paste("mean_no2", ., sep = "_"))
+```
+
+We load and clean O$_{3}$ data:
+
+```{r}
+# clean o3 data
+data_o3 <-
+  data.table::fread(
+    here::here(
+      "1.data",
+      "1.air_pollutants_data",
+      "20080101_20200901-O3_auto.csv"
+    ),
+    check.names = TRUE
+  ) %>%
+  select(date, heure, PA01H, PA04C, PA06, PA13, PA18) %>%
+  # drop first line
+  slice(-1) %>%
+  # paste the elements of date together
+  mutate(date = paste(date, heure, sep = "/")) %>%
+  # convert to date
+  mutate(date = lubridate::dmy_h(date)) %>%
+  select(-heure) %>%
+  rename_all( ~ tolower(.)) %>%
+  mutate_at(vars(-date), ~ as.numeric(.)) %>%
+  filter(date > "2008-01-01 00:00:00" &
+           date <= "2019-01-01 00:00:00")
+
+# select relevant measuring stations
+data_o3 <- data_o3 %>%
+  select(date, pa13, pa18) %>%
+  rename_at(vars(-date), ~ paste("mean_o3", ., sep = "_"))
+```
+
+We load and clean PM$_{10}$ data:
+
+```{r}
+# clean pm10 data
+data_pm10 <-
+  data.table::fread(
+    here::here(
+      "1.data",
+      "1.air_pollutants_data",
+      "20080101_20200901-PM10_auto.csv"
+    ),
+    check.names = TRUE
+  ) %>%
+  select(date, heure, PA01H, PA04C, PA15L, PA18) %>%
+  # drop first line
+  slice(-1) %>%
+  # paste the elements of date together
+  mutate(date = paste(date, heure, sep = "/")) %>%
+  # convert to date
+  mutate(date = lubridate::dmy_h(date)) %>%
+  select(-heure) %>%
+  rename_all( ~ tolower(.)) %>%
+  mutate_at(vars(-date), ~ as.numeric(.)) %>%
+  filter(date > "2008-01-01 00:00:00" &
+           date <= "2019-01-01 00:00:00")
+
+# select relevant measuring stations
+data_pm10 <- data_pm10 %>%
+  select(date, pa18)  %>%
+  rename_at(vars(-date), ~ paste("mean_pm10", ., sep = "_"))
+```
+
+We load and clean PM$_{2.5}$ data:
+
+```{r}
+# clean pm2.5 data
+data_pm25 <-
+  data.table::fread(
+    here::here(
+      "1.data",
+      "1.air_pollutants_data",
+      "20080101_20200901-PM25_auto.csv"
+    ),
+    check.names = TRUE
+  ) %>%
+  select(date, heure, PA01H, PA04C) %>%
+  # drop first line
+  slice(-1) %>%
+  # paste the elements of date together
+  mutate(date = paste(date, heure, sep = "/")) %>%
+  # convert to date
+  mutate(date = lubridate::dmy_h(date)) %>%
+  select(-heure) %>%
+  rename_all( ~ tolower(.)) %>%
+  mutate_at(vars(-date), ~ as.numeric(.)) %>%
+  filter(date > "2008-01-01 00:00:00" &
+           date <= "2019-01-01 00:00:00") %>%
+  pivot_longer(cols = -c(date),
+               names_to = "variable",
+               values_to = "concentration") %>%
+  group_by(date) %>%
+  summarise(mean_pm25 = mean(concentration, na.rm = TRUE))
+```
+
+Merge all pollutants variables together:
+
+```{r}
+# merge pollutants
+data_pollutants <- left_join(data_no2, data_o3, by = "date") %>%
+  left_join(., data_pm10, by = "date") %>%
+  left_join(., data_pm25, by = "date")
+```
+
+Compute the average concentration for each day by pollutant:
+
+```{r}
+data_pollutants <- data_pollutants %>%
+  mutate(date = str_sub(date, 1, 10) %>% ymd(.)) %>%
+  group_by(date) %>%
+  summarise_at(vars(mean_no2_pa07:mean_pm25), ~ mean(.))
+```
+
+# Cleaning Weather Data
+
+We load and clean weather data:
+
+```{r}
+# read the data and rename the variables
+weather_data <-
+  read.csv(
+    here::here(
+      "1.data",
+      "2.weather_data",
+      "daily_weather_data_paris_2008_2018.txt"
+    ),
+    header = TRUE,
+    sep = ";",
+    stringsAsFactors = FALSE,
+    dec = ","
+  ) %>%
+  rename(
+    "date" = "DATE",
+    "rainfall_height" = "RR",
+    "rainfall_duration" = "DRR",
+    "temperature_average" = "TM",
+    "humidity_average" = "UM",
+    "wind_speed" = "FXY",
+    "wind_direction" = "DXY"
+  ) %>%
+  select(-POSTE)
+
+# convert date variable in date format
+weather_data <- weather_data %>%
+  mutate(date = lubridate::ymd(weather_data$date)) %>%
+  filter(date <= "2018-12-31")
+
+# select relevant variables
+weather_data <- weather_data %>%
+  select(
+    date,
+    temperature_average,
+    rainfall_duration,
+    humidity_average,
+    wind_speed,
+    wind_direction
+  )
+```
+
+
+# Cleaning Calendar Data
+
+First, we create a dataframe with the date variable, the year, the month, and the day of the week:
+
+```{r}
+# create a dataframe with the date variable
+dates_data <-
+  tibble(date = seq.Date(
+    from = as.Date("2008-01-01"),
+    to = as.Date("2018-12-31"),
+    by = "day"
+  ))
+
+# create julian data: the starting date is 2008-01-01
+dates_data <- dates_data %>%
+  mutate(julian_date = 1:n())
+
+# create year, month and day of the week indicators
+dates_data <- dates_data %>%
+  mutate(
+    year = lubridate::year(date),
+    month = lubridate::month(date, label = TRUE, abbr = FALSE),
+    weekday = lubridate::wday(date, label = TRUE, abbr = FALSE)
+  )
+
+# reorder day of the week levels
+dates_data <- dates_data %>%
+  mutate(weekday = ordered(
+    weekday,
+    levels = c(
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    )
+  ))
+````
+
+Then, we load two datasets on holidays and bank days indicators:
+
+```{r}
+# cleaning holidays data
+data_holidays <-
+  read.csv(
+    here::here("1.data", "3.calendar_data", "data_holidays.csv"),
+    stringsAsFactors = FALSE,
+    encoding = "UTF-8"
+  ) %>%
+  select(date, vacances_zone_c, nom_vacances) %>%
+  rename(holidays_dummy = vacances_zone_c, holidays_name = nom_vacances) %>%
+  mutate(holidays_dummy = ifelse(holidays_dummy == "True", 1, 0)) %>%
+  mutate(date = lubridate::ymd(date)) %>%
+  filter(date >= "2008-01-01" & date <= "2018-12-31")
+
+# cleaning bank days data
+data_bank_days <-
+  read.csv(
+    here::here("1.data", "3.calendar_data", "data_bank_days.csv"),
+    stringsAsFactors = FALSE,
+    encoding = "UTF-8"
+  ) %>%
+  rename(bank_day_dummy = est_jour_ferie, name_bank_day = nom_jour_ferie) %>%
+  mutate(bank_day_dummy = ifelse(bank_day_dummy == "True", 1, 0)) %>%
+  mutate(date = lubridate::ymd(date)) %>%
+  filter(date >= "2008-01-01" & date <= "2018-12-31")
+```` 
+  
+We merge the three datasets together:
+
+```{r}
+# merge the three datasets together
+data_calendar <-
+  left_join(dates_data, data_holidays, by = "date") %>%
+  left_join(., data_bank_days, by = "date")
+```` 
+
+# Merging All Datasets
+
+We merge all datasets together:
+
+```{r}
+data <- left_join(data_calendar, data_pollutants, by = "date") %>%
+  left_join(., weather_data, by = "date")
+```` 
+
+# Imputing Missing Values
+
+We impute missing values using the `missRanger` package:
+
+```{r}
+# imputation of missing values
+data <- missRanger::missRanger(
+  data,
+  # variables to impute
+  mean_no2_pa07 +
+    mean_no2_pa12 +
+    mean_no2_pa13 +
+    mean_no2_pa18 +
+    mean_o3_pa13 +
+    mean_o3_pa18 +
+    mean_pm10_pa18 +
+    rainfall_duration +
+    humidity_average +
+    wind_speed +
+    wind_direction -
+    mean_pm25 ~
+    # variables used for the imputation
+    . - date - julian_date - holidays_name - name_bank_day,
+  pmm.k = 10,
+  num.trees = 100
+)
+```` 
+
+# Last Cleaning Steps
+
+We cut the rainfall duration into quartiles and wind direction into the main four directions:
+
+```{r}
+# add rainfall duration quartiles
+data <- data %>%
+  mutate(rainfall_duration = Hmisc::cut2(rainfall_duration, g = 4)) %>%
+  # create wind direction categories
+  mutate(
+    wind_direction_categories = cut(
+      wind_direction,
+      breaks = seq(0, 360, by  = 90),
+      include.lowest = TRUE
+    ) %>%
+      recode(
+        .,
+        "[0,90]" = "North-East",
+        "(90,180]" = "South-East",
+        "(180,270]" = "South-West",
+        "(270,360]" = "North-West"
+      )
+  ) 
+```` 
+
+We finally aggregate air pollutant concentrations at the city level:
+
+```{r}
+# aggregation of each pollutant's concentrations at the city level
+data <- data %>%
+  rowwise() %>%
+  mutate(mean_no2 = mean(c(
+    mean_no2_pa07, mean_no2_pa12, mean_no2_pa13, mean_no2_pa18
+  )),
+  mean_o3 = mean(c(mean_o3_pa13, mean_o3_pa18)),
+  mean_pm10 = mean_pm10_pa18) %>%
+  ungroup()
+```` 
+
+We finally select relevant variables and save the data:
+
+```{r}
+data %>%
+  select(
+    date:holidays_dummy,
+    bank_day_dummy,
+    mean_no2,
+    mean_o3,
+    mean_pm10,
+    mean_pm25,
+    temperature_average:wind_speed,
+    wind_direction,
+    wind_direction_categories
+  ) %>%
+  saveRDS(.,
+          here::here("1.data", "5.data_for_analysis", "data_for_analysis.RDS"))
+```` 
+
+
+

@@ -1,0 +1,623 @@
+---
+title: "Exploratory Data Analysis"
+description: |
+  Wind Patterns & Air Pollution in Paris, France.
+author:
+  - name: Léo Zabrocki 
+    url: https://lzabrocki.github.io/
+    affiliation: Paris School of Economics
+    affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
+  - name: Anna Alari 
+    url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
+    affiliation: Sorbonne Université & INSERM
+    affiliation_url: https://www.inserm.fr/
+  - name: Tarik Benmarnhia
+    url: https://profiles.ucsd.edu/tarik.benmarhnia
+    affiliation: UCSD & Scripps Institute
+    affiliation_url: https://benmarhniaresearch.ucsd.edu/
+date: "`r Sys.Date()`"
+output: 
+    distill::distill_article:
+      keep_md: true
+      toc: true
+      toc_depth: 2
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+# code chunk option
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  layout="l-body-outset",
+  dev = "CairoPNG",
+  dpi = 300
+)
+```
+
+
+In this document, we carry out an exploratory data analysis to understand the relationships of wind patterns with other variables:
+
+* We first explore general patterns related to wind directions.
+* We then check if covariates are balanced when we define treated days as units with North-East winds and control days as units where winds blow from other directions.
+
+**Should you have any questions, need help to reproduce the analysis or find coding errors, please do not hesitate to contact me at leo.zabrocki@psemail.eu**
+
+# Required Packages
+
+To reproduce exactly the `script_eda.html` document, we first need to have installed:
+
+* the [R](https://www.r-project.org/) programming language on your computer 
+* [RStudio](https://rstudio.com/), an integrated development environment for R, which will allow you to knit the `script_eda.Rmd` file and interact with the R code chunks
+* the [R Markdown](https://rmarkdown.rstudio.com/) package
+* and the [Distill](https://rstudio.github.io/distill/) package which provides the template of this document. 
+
+Once everything is set up, we have to load the following packages:
+
+```{r}
+# load required packages
+library(knitr) # for creating the R Markdown document
+library(here) # for files paths organization
+library(tidyverse) # for data manipulation and visualization
+library(ggridges) # for ridge plots
+library(openair) # polar plots
+```
+
+We load our custom `ggplot2` theme for graphs:
+
+```{r}
+# load ggplot customed theme
+source(here::here(
+  "2.scripts",
+  "4.custom_ggplot2_theme",
+  "script_theme_tufte.R"
+))
+# define nice colors
+my_blue <- "#0081a7"
+my_orange <- "#fb8500"
+````
+
+We finally load the data:
+
+```{r}
+# load data
+data <-
+  readRDS(here::here("1.data", "5.data_for_analysis", "data_for_analysis.RDS"))
+````
+
+# General EDA 
+
+We explore general patterns related to wind directions.
+
+### Wind Direction & Air Pollutants
+
+We plot the distribution of PM10 concentration by wind direction:
+
+```{r, fig.width=8, fig.height=5}
+# make the graph
+graph_wd_pm10 <- data %>%
+  ggplot(., aes(x = mean_pm10, y = fct_rev(wind_direction_categories))) +
+  geom_density_ridges(
+    color = NA,
+    size = 0.3,
+    fill = my_blue,
+    alpha = 0.8
+  ) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  xlab("Concentration (µg/m³)") +
+  ylab("Wind Direction") +
+  theme_tufte() +
+  theme(axis.title.y = element_text(angle = 90, hjust = 1))
+
+# display the graph
+graph_wd_pm10
+
+# save the graph
+ggsave(
+  graph_wd_pm10,
+  filename = here::here("3.outputs", "1.eda", "graph_wd_pm10.pdf"),
+  width = 15,
+  height = 8,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+We plot the distribution of all pollutant concentrations by wind direction:
+
+```{r, fig.width=16, fig.height=8}
+# make the graph
+graph_wd_pollutants <- data %>%
+  rename(
+    "PM10" = mean_pm10,
+    "PM2.5" = mean_pm25,
+    "NO2" = mean_no2,
+    "O3" = mean_o3
+  ) %>%
+  pivot_longer(
+    cols = c(PM10, PM2.5, NO2, O3),
+    names_to = "pollutant",
+    values_to = "concentration"
+  ) %>%
+  ggplot(.,  aes(x = concentration, y = fct_rev(wind_direction_categories))) +
+  geom_density_ridges(
+    color = NA,
+    size = 0.3,
+    fill = my_blue,
+    alpha = 0.8
+  ) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  facet_wrap( ~ pollutant, scales = "free") +
+  xlab("Concentration (µg/m³)") +
+  ylab("Wind Direction") +
+  theme_tufte()
+
+# display the graph
+graph_wd_pollutants
+
+# save the graph
+ggsave(
+  graph_wd_pollutants,
+  filename = here::here("3.outputs", "1.eda", "graph_wd_pollutants.pdf"),
+  width = 20,
+  height = 12,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+Using the `openair` package, we predict air pollutant concentrations using wind components:
+
+```{r, eval = FALSE}
+# select relevant variables for the polar plots
+data_polar_plots <- data %>%
+  select(wind_speed,
+         wind_direction,
+         mean_no2,
+         mean_o3,
+         mean_pm10,
+         mean_pm25) %>%
+  rename('Wind Speed' = wind_speed)
+
+# make the polarPlot for all pollutants
+no2_plot <-
+  polarPlot(
+    data_polar_plots,
+    pollutant = "mean_no2",
+    x = "Wind Speed",
+    wd = "wind_direction",
+    main = "Average NO2 (' * mu * 'g/m' ^3 *')",
+    key.header = "",
+    key.footer = "",
+    resolution = "fine",
+    par.settings = list(fontsize = list(text = 18))
+  )
+
+o3_plot <-
+  polarPlot(
+    data_polar_plots,
+    pollutant = "mean_o3",
+    x = "Wind Speed",
+    wd = "wind_direction",
+    main = "Average O3 (' * mu * 'g/m' ^3 *')",
+    key.header = "",
+    key.footer = "",
+    resolution = "fine",
+    par.settings = list(fontsize = list(text = 18))
+  )
+
+pm10_plot <-
+  polarPlot(
+    data_polar_plots,
+    pollutant = "mean_pm10",
+    x = "Wind Speed",
+    wd = "wind_direction",
+    main = "Average PM10 (' * mu * 'g/m' ^3 *')",
+    key.header = "",
+    key.footer = "",
+    resolution = "fine",
+    par.settings = list(fontsize = list(text = 18))
+  )
+
+pm25_plot <-
+  polarPlot(
+    data_polar_plots,
+    pollutant = "mean_pm25",
+    x = "Wind Speed",
+    wd = "wind_direction",
+    main = "Average PM2.5 (' * mu * 'g/m' ^3 *')",
+    key.header = "",
+    key.footer = "",
+    resolution = "fine",
+    par.settings = list(fontsize = list(text = 18))
+  )
+
+# save the graph
+pdf(
+  here::here("3.outputs", "1.eda", "graph_polar_plots_pollutants.pdf"),
+  width = 15,
+  height = 5
+)
+print(no2_plot, split = c(1, 1, 4, 1), more = TRUE)
+print(o3_plot, split = c(2, 1, 4, 1), more = TRUE)
+print(pm10_plot, split = c(3, 1, 4, 1), more = TRUE)
+print(pm25_plot, split = c(4, 1, 4, 1), more = FALSE)
+dev.off()
+````
+
+### Wind Direction & Other Weather Parameters
+
+We plot the distribution of continuous weather parameter by wind direction:
+
+```{r, fig.width=15, fig.height=5}
+# make the graph
+graph_wd_weather <- data %>%
+  rename(
+    "Average Temperature (°C)" = temperature_average,
+    "Average Humidity (%)" = humidity_average,
+    "Wind Speed (m/s)" = wind_speed
+  ) %>%
+  pivot_longer(
+    cols = c(
+      "Average Temperature (°C)",
+      "Average Humidity (%)",
+      "Wind Speed (m/s)"
+    ),
+    names_to = "weather_parameter",
+    values_to = "value"
+  ) %>%
+  mutate(
+    horizontal_lines = case_when(
+      weather_parameter == "Average Temperature (°C)" ~ -6,
+      weather_parameter == "Average Humidity (%)" ~ 25,
+      weather_parameter == "Wind Speed (m/s)" ~ 0
+    )
+  ) %>%
+  ggplot(., aes(x = value, y = wind_direction_categories)) +
+  geom_density_ridges(
+    color = NA,
+    size = 0.3,
+    fill = my_blue,
+    alpha = 0.8
+  ) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  facet_wrap(~ weather_parameter, scales = "free") +
+  xlab("") +
+  ylab("Wind Direction") +
+  theme_tufte()
+
+# display the graph
+graph_wd_weather
+
+# save the graph
+ggsave(
+  graph_wd_weather,
+  filename = here::here("3.outputs", "1.eda", "graph_wd_weather.pdf"),
+  width = 30,
+  height = 10,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+We plot the distribution of rainfall duration by wind direction:
+
+```{r, fig.width=15, fig.height=5}
+# make the graph
+graph_wd_rainfall <- data %>%
+  select(rainfall_duration, wind_direction_categories) %>%
+  group_by(wind_direction_categories, rainfall_duration) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100) %>%
+  ungroup() %>%
+  mutate(
+    rainfall_duration = case_when(
+      rainfall_duration == "  0" ~ "0 minute",
+      rainfall_duration == "[  1,  14)" ~ "[1, 14) minutes",
+      rainfall_duration == "[ 14, 158)" ~ "[14, 158) minutes",
+      rainfall_duration == "[158,1440]" ~ "[158,1440] minutes"
+    )
+  ) %>%
+  mutate(
+    rainfall_duration = fct_relevel(
+      rainfall_duration,
+      "0 minute",
+      "[1, 14) minutes",
+      "[14, 158) minutes",
+      "[158,1440] minutes"
+    )
+  ) %>%
+  ggplot(., aes(x = proportion, y = rainfall_duration)) +
+  geom_point(shape = 16,
+             colour = my_blue,
+             size = 4) +
+  geom_vline(xintercept = 0,
+             size = 0.3,
+             colour = "black") +
+  facet_wrap( ~ wind_direction_categories, ncol = 4) +
+  xlab("Proportion (%)") + ylab("") +
+  theme_tufte()
+
+# display the graph
+graph_wd_rainfall
+
+# save the graph
+ggsave(
+  graph_wd_rainfall,
+  filename = here::here("3.outputs", "1.eda", "graph_wd_rainfall.pdf"),
+  width = 25,
+  height = 10,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+### Wind Direction & Calendar Indicators
+
+We plot the distribution of wind direction by month:
+
+```{r, fig.width=15, fig.height=6}
+# make the graph
+graph_wd_month <- data %>%
+  select(month, wind_direction_categories) %>%
+  group_by(wind_direction_categories, month) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100) %>%
+  ungroup() %>%
+  ggplot(., aes(x = month, y = proportion, group = "l")) +
+  geom_line(colour = "gray80") +
+  geom_point(colour = my_blue, size = 3) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 7)) +
+  facet_wrap( ~ wind_direction_categories, ncol = 2) +
+  xlab("") + ylab("Proportion (%)") +
+  theme_tufte()
+# display the graph
+graph_wd_month
+
+# save the graph
+ggsave(
+  graph_wd_month,
+  filename = here::here("3.outputs", "1.eda", "graph_wd_month.pdf"),
+  width = 35,
+  height = 15,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+We plot the distribution of wind direction by year:
+
+```{r, fig.width=12, fig.height=6}
+# make the graph
+graph_wd_year <- data %>%
+  select(year, wind_direction_categories) %>%
+  mutate(year = as.factor(year)) %>%
+  group_by(wind_direction_categories, year) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100) %>%
+  ungroup() %>%
+  ggplot(., aes(x = year, y = proportion, group = "l")) +
+  geom_line(colour = "gray80") +
+  geom_point(colour = my_blue, size = 3) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 7)) +
+  facet_wrap( ~ wind_direction_categories, ncol = 2) +
+  xlab("") + ylab("Proportion (%)") +
+  theme_tufte()
+
+# display the graph
+graph_wd_year
+
+# save the graph
+ggsave(
+  graph_wd_year,
+  filename = here::here("3.outputs", "1.eda", "graph_wd_year.pdf"),
+  width = 30,
+  height = 15,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+# Covariates Imbalance EDA 
+
+We check if covariates are balanced when we define treated days as units with North-East winds and control days as units where winds blow from other directions.
+
+### Defining Treatment
+
+The treatment is defined as follows:
+
+* treated units are days where winds blow from the North-East in *t*.
+* control units are day winds blow from other directions in *t*.
+
+```{r}
+# construct treatment assigment variable
+data <- data %>%
+  mutate(is_treated = ifelse(
+    wind_direction_categories == "North-East",
+    "Treated",
+    "Control"
+  ))
+````
+
+### Weather Covariates Imbalance
+
+We plot density distributions for continuous weather covariates by treatment status:
+
+```{r, fig.width=10, fig.height=4}
+# we select control variables and store them in a long dataframe
+data_weather_continuous_variables <- data %>%
+  select(temperature_average,
+         humidity_average,
+         wind_speed,
+         is_treated) %>%
+  pivot_longer(
+    cols = -c(is_treated),
+    names_to = "variable",
+    values_to = "values"
+  ) %>%
+  mutate(
+    variable = NA %>%
+      ifelse(
+        str_detect(variable, "temperature_average"),
+        "Average Temperature (°C)",
+        .
+      ) %>%
+      ifelse(
+        str_detect(variable, "humidity_average"),
+        "Humidity Average (%)",
+        .
+      ) %>%
+      ifelse(str_detect(variable, "wind_speed"), "Wind Speed (m/s)", .)
+  )
+
+# make the graph
+graph_boxplot_continuous_weather <-
+  ggplot(data_weather_continuous_variables,
+         aes(x = values, y = is_treated, fill = is_treated)) +
+  geom_density_ridges(colour = NA) +
+  scale_fill_manual(values = c(my_blue, my_orange)) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  xlab("Covariate Value") +
+  ylab("") +
+  labs(fill = "Units Status:") +
+  facet_wrap( ~ variable, scale = "free", ncol = 3) +
+  theme_tufte()
+
+# we print the graph
+graph_boxplot_continuous_weather
+
+# save the graph
+ggsave(
+  graph_boxplot_continuous_weather,
+  filename = here::here("3.outputs", "1.eda", "graph_boxplot_continuous_weather.pdf"),
+  width = 30,
+  height = 10,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+We draw love plots which display the standardized mean differences between treated and control days for each weather covariate and by month:
+
+```{r, fig.width=12, fig.height=4}
+# compute absolute differences
+data_abs_difference <- data %>%
+  select(month,
+         is_treated,
+         temperature_average,
+         humidity_average,
+         wind_speed) %>%
+  group_by(month, is_treated) %>%
+  summarise_all(., ~ mean(., na.rm = TRUE)) %>%
+  pivot_longer(
+    cols = -c(month, is_treated),
+    names_to = "variable",
+    values_to = "average"
+  ) %>%
+  arrange(month, variable) %>%
+  group_by(month, variable) %>%
+  summarise(abs_difference = abs(average[2] - average[1]))
+
+# we compute the standard deviation of each treatment group covariate
+data_sd <- data %>%
+  select(month,
+         is_treated,
+         temperature_average,
+         humidity_average,
+         wind_speed) %>%
+  filter(is_treated == "Treated") %>%
+  select(-is_treated) %>%
+  group_by(month) %>%
+  summarise_all(., ~ sd(., na.rm = TRUE)) %>%
+  pivot_longer(cols = -c(month),
+               names_to = "variable",
+               values_to = "sd_treatment")
+
+# we merge data_abs_difference and data_sd
+data_love <-
+  left_join(data_abs_difference, data_sd, by = c("month", "variable")) %>%
+  mutate(standardized_difference = abs_difference / sd_treatment) %>%
+  select(-c(abs_difference, sd_treatment)) %>%
+  mutate(
+    variable = case_when(
+      variable == "temperature_average" ~ "Average Temperature (°C)",
+      variable == "humidity_average" ~ "Humidity Average (%)",
+      variable == "wind_speed" ~ "Wind Speed (m/s)"
+    )
+  )
+
+# we make the graph
+graph_love <-
+  ggplot(data_love, aes(y = fct_rev(variable), x = standardized_difference)) +
+  geom_vline(xintercept = 0, size = 0.3) +
+  geom_vline(xintercept = 0.1,
+             color = my_orange,
+             size = 0.3) +
+  geom_point(size = 2, colour = my_blue) +
+  facet_wrap( ~ month, ncol = 6) +
+  xlab("Standardized Mean Differences") +
+  ylab("") +
+  theme_tufte() +
+  theme(
+    axis.text.y = element_text(size = 10),
+    axis.text.x = element_text(size = 10),
+    panel.spacing = unit(0.5, "cm"),
+    plot.margin = unit(c(0.5, 0.5, 0.5, -0.5), "cm")
+  )
+
+
+# we print the graph
+graph_love
+
+# save the graph
+ggsave(
+  graph_love,
+  filename = here::here("3.outputs", "1.eda", "graph_love_weather.pdf"),
+  width = 28,
+  height = 9,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+### Calendar Imbalance
+
+We plot the proportion of treated units by month:
+
+```{r, fig.width=10, fig.height=4}
+# make the graph
+graph_treated_month <- data %>%
+  select(month, is_treated) %>%
+  group_by(month, is_treated) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100) %>%
+  ungroup() %>%
+  filter(is_treated == "Treated") %>%
+  ggplot(., aes(x = month, y = proportion, group = "l")) +
+  geom_line(colour = "gray80") +
+  geom_point(colour = my_blue, size = 3) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 7)) +
+  xlab("") + ylab("Proportion (%)") +
+  theme_tufte()
+
+# display the graph
+graph_treated_month
+
+# save the graph
+ggsave(
+  graph_treated_month,
+  filename = here::here("3.outputs", "1.eda", "graph_treated_month.pdf"),
+  width = 20,
+  height = 8,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+
+
