@@ -11,7 +11,7 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
@@ -36,7 +36,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   layout="l-body-outset",
   dev = "CairoPNG",
-  dpi = 300
+  dpi = 600
 )
 ```
 
@@ -349,6 +349,7 @@ graph_ci <-
       ymin = lower_bound_95 ,
       ymax = upper_bound_95
     ),
+    size = 0.5,
     colour = my_blue,
     lwd = 0.8
   ) +
@@ -360,11 +361,11 @@ graph_ci <-
       ymax = upper_bound_99
     ),
     colour = my_blue,
-    lwd = 0.4
+    lwd = 0.3
   ) +
   scale_y_continuous(breaks = scales::pretty_breaks(n = 8)) +
   facet_wrap( ~ pollutant, ncol = 4) +
-  scale_fill_manual(values = c('gray96', NA)) +
+  scale_fill_manual(values = c('gray96', "white")) +
   guides(fill = FALSE) +
   ylab("Average Increase in\n Concentrations (µg/m³)") + xlab("Day") +
   theme_tufte() +
@@ -378,7 +379,7 @@ graph_ci
 ggsave(
   graph_ci,
   filename = here::here("3.outputs", "2.matching_analysis", "graph_ci.pdf"),
-  width = 20,
+  width = 16,
   height = 8,
   units = "cm",
   device = cairo_pdf

@@ -11,11 +11,11 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2021-11-02"
+date: "2021-11-03"
 output: 
     distill::distill_article:
       keep_md: true
@@ -716,7 +716,7 @@ We finally plot the distribution of standardized mean differences for continuous
   <span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>scale_y_continuous</span><span class='op'>(</span>breaks <span class='op'>=</span> <span class='fu'>scales</span><span class='fu'>::</span><span class='fu'><a href='https://scales.r-lib.org/reference/breaks_pretty.html'>pretty_breaks</a></span><span class='op'>(</span>n <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Dataset"</span><span class='op'>)</span> <span class='op'>+</span>
-  <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>"Standardized Mean Differences"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>"Standardized\nMean Differences"</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>ggtitle</span><span class='op'>(</span><span class='st'>"Continuous Variables"</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>theme</span><span class='op'>(</span>axis.text.x <span class='op'>=</span> <span class='fu'>element_text</span><span class='op'>(</span>margin <span class='op'>=</span> <span class='fu'>ggplot2</span><span class='fu'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/element.html'>margin</a></span><span class='op'>(</span>t <span class='op'>=</span> <span class='fl'>0</span>, unit <span class='op'>=</span> <span class='st'>"cm"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
@@ -814,7 +814,7 @@ We combine the two previous plots:
     <span class='st'>"2.matching_analysis"</span>,
     <span class='st'>"graph_overall_balance.pdf"</span>
   <span class='op'>)</span>,
-  width <span class='op'>=</span> <span class='fl'>30</span>,
+  width <span class='op'>=</span> <span class='fl'>20</span>,
   height <span class='op'>=</span> <span class='fl'>10</span>,
   units <span class='op'>=</span> <span class='st'>"cm"</span>,
   device <span class='op'>=</span> <span class='va'>cairo_pdf</span>

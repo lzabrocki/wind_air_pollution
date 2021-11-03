@@ -11,7 +11,7 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
@@ -143,7 +143,7 @@ graph_density_continuous_weather_variables <-
   geom_density_ridges(colour = NA) +
   scale_fill_manual(values = c(my_blue, my_orange),
                     guide = guide_legend(reverse = TRUE)) +
-  xlab("Covariate Value") +
+  xlab("Covariate Value") + ylab("") +
   labs(fill = "Dataset:") +
   facet_wrap( ~ variable, scale = "free_x", ncol = 3) +
   theme_tufte() +
@@ -165,7 +165,7 @@ graph_density_continuous_weather_variables
 
 We plot the proportion of weather categorical variables for the two datasets 
 
-```{r, fig.width=15, fig.height=5, dev = "CairoPNG"}
+```{r, fig.width=12, fig.height=10, dev = "CairoPNG"}
 # we select categorical weather variables and store them in a long dataframe
 data_categorical_weather_variables <- data_all %>%
   # select relevant variables
@@ -175,8 +175,8 @@ data_categorical_weather_variables <- data_all %>%
   mutate(
     rainfall_duration = case_when(
       rainfall_duration == "Rainfall Duration:   0" ~ "Rainfall Duration: 0 min",
-      rainfall_duration == "Rainfall Duration: [  1,  14)" ~ "Rainfall Duration: [1, 14) min",
-      rainfall_duration == "Rainfall Duration: [ 14, 158)" ~ "Rainfall Duration: [14, 158) min",
+      rainfall_duration == "Rainfall Duration: [  1,  13)" ~ "Rainfall Duration: [1, 13) min",
+      rainfall_duration == "Rainfall Duration: [ 13, 158)" ~ "Rainfall Duration: [13, 158) min",
       rainfall_duration == "Rainfall Duration: [158,1440]" ~ "Rainfall Duration: [158, 1440] min"
     )
   ) %>%
@@ -224,7 +224,7 @@ graph_categorical_weather_variables <-
              size = 4) +
   scale_fill_manual(values = c(my_blue, my_orange),
                     guide = guide_legend(reverse = TRUE)) +
-  facet_wrap( ~ values, scale = "free_x", ncol = 4) +
+  facet_wrap( ~ values, scale = "free_x", ncol = 3) +
   ylab("") +
   xlab("Proportion (%)") +
   labs(fill = "Dataset:") +
@@ -262,7 +262,7 @@ ggsave(graph_weather_three_datasets, filename = here::here("3.outputs", "2.match
 
 We plot the proportions of observations belonging to each day of the week by dataset:
 
-```{r, fig.width=20, fig.height=8, dev = "CairoPNG"}
+```{r, fig.width=10, fig.height=5, dev = "CairoPNG"}
 # compute the proportions of observations belonging to each day of the week by dataset
 data_weekday <- data_all %>%
   mutate(weekday = lubridate::wday(date, abbr = FALSE, label = TRUE)) %>%
@@ -315,7 +315,7 @@ graph_weekday
 
 We plot the proportions of observations belonging to bank days and holidays by dataset:
 
-```{r, fig.width=15, fig.height=6, dev = "CairoPNG"}
+```{r, fig.width=10, fig.height=5, dev = "CairoPNG"}
 # compute the proportions of observations belonging to bank days and holidays by dataset
 data_bank_holidays <- data_all %>%
   select(bank_day_dummy, holidays_dummy, dataset) %>%
@@ -366,7 +366,7 @@ graph_bank_holidays
 
 We plot the proportions of observations belonging to each month by dataset:
 
-```{r, fig.width=20, fig.height=8, dev = "CairoPNG"}
+```{r, fig.width=11, fig.height=5, dev = "CairoPNG"}
 # compute the proportions of observations belonging to each month by dataset
 data_month <- data_all %>%
   select(month, dataset) %>%
@@ -439,7 +439,7 @@ graph_month
 
 We plot the proportions of observations belonging to each year by dataset:
 
-```{r, fig.width=20, fig.height=8, dev = "CairoPNG"}
+```{r, fig.width=10, fig.height=5, dev = "CairoPNG"}
 # compute the proportions of observations belonging to each year by dataset
 data_year <- data_all %>%
   select(year, dataset) %>%

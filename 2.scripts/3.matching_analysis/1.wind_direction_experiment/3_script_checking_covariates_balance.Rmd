@@ -11,7 +11,7 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
@@ -36,7 +36,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   layout="l-body-outset",
   dev = "CairoPNG",
-  dpi = 300
+  dpi = 600
 )
 ```
 

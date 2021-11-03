@@ -30,13 +30,13 @@ theme_tufte <- function() {
       axis.title.x = ggplot2::element_text(
         family = font,
         hjust = 1,
-        size = 12,
+        size = 14,
         margin = margin(t = 0.2, unit = "cm")
       ),
       axis.title.y = ggplot2::element_text(
         family = font,
         hjust = 1,
-        size = 12,
+        size = 14,
         angle = 90,
         margin = margin(r = 0.2, unit = "cm")
       ),
@@ -44,13 +44,13 @@ theme_tufte <- function() {
       axis.text.x = element_text(
         family = font,
         color = "black",
-        size = 8,
+        size = 12,
         margin = margin(t = 0.2, unit = "cm")
       ),
       axis.text.y = element_text(
         family = font,
         color = "black",
-        size = 8,
+        size = 12,
         margin = margin(r = 0.2, unit = "cm")
       ),
       # axis ticks
@@ -75,11 +75,10 @@ theme_tufte <- function() {
       legend.direction = "horizontal",
       legend.title = element_text(
         family = font,
-        size = 12,
+        size = 14,
         face = "bold"
       ),
       legend.text = element_text(family = font, size = 12)
-      #plot.margin = margin(0.25, 0.25, 0.25, 0.25, "cm")
     )
 }
 

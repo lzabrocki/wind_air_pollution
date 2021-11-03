@@ -11,11 +11,11 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2021-11-02"
+date: "2021-11-03"
 output: 
     distill::distill_article:
       keep_md: true
@@ -64,7 +64,7 @@ Once everything is set up, we have to load the following packages:
 We load our custom `ggplot2` theme for graphs:
 
 <div class="layout-chunk" data-layout="l-body-outset">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># load ggplot customed theme</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># load ggplot custom theme</span>
 <span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span>
   <span class='st'>"2.scripts"</span>,
   <span class='st'>"4.custom_ggplot2_theme"</span>,
@@ -329,8 +329,8 @@ We plot the distribution of rainfall duration by wind direction:
   <span class='fu'>mutate</span><span class='op'>(</span>
     rainfall_duration <span class='op'>=</span> <span class='fu'>case_when</span><span class='op'>(</span>
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"  0"</span> <span class='op'>~</span> <span class='st'>"0 minute"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[  1,  14)"</span> <span class='op'>~</span> <span class='st'>"[1, 14) minutes"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[ 14, 158)"</span> <span class='op'>~</span> <span class='st'>"[14, 158) minutes"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[  1,  13)"</span> <span class='op'>~</span> <span class='st'>"[1, 13) minutes"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[ 13, 158)"</span> <span class='op'>~</span> <span class='st'>"[13, 158) minutes"</span>,
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[158,1440]"</span> <span class='op'>~</span> <span class='st'>"[158,1440] minutes"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
@@ -338,8 +338,8 @@ We plot the distribution of rainfall duration by wind direction:
     rainfall_duration <span class='op'>=</span> <span class='fu'>fct_relevel</span><span class='op'>(</span>
       <span class='va'>rainfall_duration</span>,
       <span class='st'>"0 minute"</span>,
-      <span class='st'>"[1, 14) minutes"</span>,
-      <span class='st'>"[14, 158) minutes"</span>,
+      <span class='st'>"[1, 13) minutes"</span>,
+      <span class='st'>"[13, 158) minutes"</span>,
       <span class='st'>"[158,1440] minutes"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>

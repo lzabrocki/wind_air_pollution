@@ -11,7 +11,7 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
@@ -36,7 +36,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   layout = "l-body-outset",
   dev = "CairoPNG",
-  dpi = 300
+  dpi = 600
 )
 ```
 
@@ -664,7 +664,7 @@ We finally plot the distribution of standardized mean differences for continuous
 
 ### Continuous Covariates
 
-```{r, fig.width=10, fig.height=5}
+```{r, fig.width=6, fig.height=4}
 # we select the dataset indicator and the standardized difference
 data_love_pollutants <- data_love_pollutants %>%
   ungroup() %>%
@@ -690,7 +690,7 @@ graph_boxplot_continuous_balance_improvement <-
   ) +
   scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
   xlab("Dataset") +
-  ylab("Standardized Mean Differences") +
+  ylab("Standardized\nMean Differences") +
   ggtitle("Continuous Variables") +
   theme_tufte() +
   theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")))
@@ -715,7 +715,7 @@ ggsave(
 
 ### Categorical Covariates
 
-```{r, fig.width=10, fig.height=5}
+```{r, fig.width=6, fig.height=4}
 # we select the dataset indicator and the standardized difference
 data_calendar <- data_calendar %>%
   ungroup() %>%
@@ -768,7 +768,7 @@ ggsave(
 
 We combine the two previous plots:
 
-```{r, fig.width=10, fig.height=5}
+```{r, fig.width=8, fig.height=4}
 # combine the two previous plots
 graph_overall_balance  <-
   graph_boxplot_continuous_balance_improvement + graph_boxplot_categorical_balance_improvement +
@@ -782,7 +782,7 @@ ggsave(
     "2.matching_analysis",
     "graph_overall_balance.pdf"
   ),
-  width = 30,
+  width = 20,
   height = 10,
   units = "cm",
   device = cairo_pdf

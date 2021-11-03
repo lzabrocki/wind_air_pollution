@@ -11,7 +11,7 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
@@ -36,7 +36,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   layout="l-body-outset",
   dev = "CairoPNG",
-  dpi = 300
+  dpi = 600
 )
 ```
 
@@ -71,7 +71,7 @@ library(openair) # polar plots
 We load our custom `ggplot2` theme for graphs:
 
 ```{r}
-# load ggplot customed theme
+# load ggplot custom theme
 source(here::here(
   "2.scripts",
   "4.custom_ggplot2_theme",
@@ -318,8 +318,8 @@ graph_wd_rainfall <- data %>%
   mutate(
     rainfall_duration = case_when(
       rainfall_duration == "  0" ~ "0 minute",
-      rainfall_duration == "[  1,  14)" ~ "[1, 14) minutes",
-      rainfall_duration == "[ 14, 158)" ~ "[14, 158) minutes",
+      rainfall_duration == "[  1,  13)" ~ "[1, 13) minutes",
+      rainfall_duration == "[ 13, 158)" ~ "[13, 158) minutes",
       rainfall_duration == "[158,1440]" ~ "[158,1440] minutes"
     )
   ) %>%
@@ -327,8 +327,8 @@ graph_wd_rainfall <- data %>%
     rainfall_duration = fct_relevel(
       rainfall_duration,
       "0 minute",
-      "[1, 14) minutes",
-      "[14, 158) minutes",
+      "[1, 13) minutes",
+      "[13, 158) minutes",
       "[158,1440] minutes"
     )
   ) %>%
@@ -361,7 +361,7 @@ ggsave(
 
 We plot the distribution of wind direction by month:
 
-```{r, fig.width=15, fig.height=6}
+```{r, fig.width=20, fig.height=6}
 # make the graph
 graph_wd_month <- data %>%
   select(month, wind_direction_categories) %>%

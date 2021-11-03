@@ -11,11 +11,11 @@ author:
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
     affiliation: Sorbonne Université & INSERM
     affiliation_url: https://www.inserm.fr/
-  - name: Tarik Benmarnhia
+  - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2021-11-02"
+date: "2021-11-03"
 output: 
     distill::distill_article:
       keep_md: true
@@ -142,7 +142,7 @@ We plot below the density distributions of continuous weather covariates for the
   <span class='fu'><a href='https://wilkelab.org/ggridges/reference/geom_density_ridges.html'>geom_density_ridges</a></span><span class='op'>(</span>colour <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>scale_fill_manual</span><span class='op'>(</span>values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>my_blue</span>, <span class='va'>my_orange</span><span class='op'>)</span>,
                     guide <span class='op'>=</span> <span class='fu'>guide_legend</span><span class='op'>(</span>reverse <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
-  <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Covariate Value"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Covariate Value"</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>labs</span><span class='op'>(</span>fill <span class='op'>=</span> <span class='st'>"Dataset:"</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>facet_wrap</span><span class='op'>(</span> <span class='op'>~</span> <span class='va'>variable</span>, scale <span class='op'>=</span> <span class='st'>"free_x"</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
@@ -178,8 +178,8 @@ We plot the proportion of weather categorical variables for the two datasets
   <span class='fu'>mutate</span><span class='op'>(</span>
     rainfall_duration <span class='op'>=</span> <span class='fu'>case_when</span><span class='op'>(</span>
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration:   0"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: 0 min"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [  1,  14)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [1, 14) min"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [ 14, 158)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [14, 158) min"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [  1,  13)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [1, 13) min"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [ 13, 158)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [13, 158) min"</span>,
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [158,1440]"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [158, 1440] min"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
@@ -227,7 +227,7 @@ We plot the proportion of weather categorical variables for the two datasets
              size <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>scale_fill_manual</span><span class='op'>(</span>values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>my_blue</span>, <span class='va'>my_orange</span><span class='op'>)</span>,
                     guide <span class='op'>=</span> <span class='fu'>guide_legend</span><span class='op'>(</span>reverse <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
-  <span class='fu'>facet_wrap</span><span class='op'>(</span> <span class='op'>~</span> <span class='va'>values</span>, scale <span class='op'>=</span> <span class='st'>"free_x"</span>, ncol <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>facet_wrap</span><span class='op'>(</span> <span class='op'>~</span> <span class='va'>values</span>, scale <span class='op'>=</span> <span class='st'>"free_x"</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Proportion (%)"</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>labs</span><span class='op'>(</span>fill <span class='op'>=</span> <span class='st'>"Dataset:"</span><span class='op'>)</span> <span class='op'>+</span>
