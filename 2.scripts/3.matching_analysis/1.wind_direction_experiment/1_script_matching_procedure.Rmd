@@ -107,7 +107,7 @@ First, we load the data:
 ```{r}
 # load data
 data <-
-  readRDS(here::here("1.data", "5.data_for_analysis", "data_for_analysis.RDS")) %>%
+  readRDS(here::here("1.data", "4.data_for_analysis", "data_for_analysis.RDS")) %>%
   # drop wind direction variable as we use instead wind direction categories
   select(-wind_direction)
 ```
@@ -204,7 +204,7 @@ We save the `matching_data` :
 ```{r}
 # save the matching data
 saveRDS(matching_data,
-        here::here("1.data", "6.matched_data", "matching_data.Rds"))
+        here::here("1.data", "5.matched_data", "matching_data.Rds"))
 ```
 
 # Matching Procedure
@@ -348,7 +348,7 @@ final_data <- left_join(matched_pairs, matching_data, by = "date")
 
 # save the matched data
 saveRDS(final_data,
-        here::here("1.data", "6.matched_data", "matched_data.Rds"))
+        here::here("1.data", "5.matched_data", "matched_data.Rds"))
 ```
 
 

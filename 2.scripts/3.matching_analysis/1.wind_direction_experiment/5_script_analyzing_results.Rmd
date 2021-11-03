@@ -92,7 +92,7 @@ We load the matched data:
 ```{r}
 # load matched data
 data_matched <-
-  readRDS(here::here("1.data", "6.matched_data", "matched_data.rds"))
+  readRDS(here::here("1.data", "5.matched_data", "matched_data.rds"))
 ```
 
 # Distribution of the Pair Differences in Concentration between Treated and Control units for each Pollutant

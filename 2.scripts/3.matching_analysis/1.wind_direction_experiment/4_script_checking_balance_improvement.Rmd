@@ -91,12 +91,12 @@ We load the initial and matched data and bind them together:
 ```{r}
 # load matching data
 data_matching <-
-  readRDS(here::here("1.data", "6.matched_data", "matching_data.rds")) %>%
+  readRDS(here::here("1.data", "5.matched_data", "matching_data.rds")) %>%
   mutate(dataset = "Initial Data")
 
 # load matched data
 data_matched <-
-  readRDS(here::here("1.data", "6.matched_data", "matched_data.rds")) %>%
+  readRDS(here::here("1.data", "5.matched_data", "matched_data.rds")) %>%
   mutate(dataset = "Matched Data")
 
 # bind the two datasets

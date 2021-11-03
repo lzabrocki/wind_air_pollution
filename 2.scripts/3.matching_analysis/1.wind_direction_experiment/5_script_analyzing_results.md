@@ -88,7 +88,7 @@ We load the matched data:
 <div class="layout-chunk" data-layout="l-body-outset">
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># load matched data</span>
 <span class='va'>data_matched</span> <span class='op'>&lt;-</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>readRDS</a></span><span class='op'>(</span><span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"1.data"</span>, <span class='st'>"6.matched_data"</span>, <span class='st'>"matched_data.rds"</span><span class='op'>)</span><span class='op'>)</span>
+  <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>readRDS</a></span><span class='op'>(</span><span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"1.data"</span>, <span class='st'>"5.matched_data"</span>, <span class='st'>"matched_data.rds"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre></div>
 
 </div>
@@ -411,8 +411,8 @@ We display below the table with the point estimates and the 95% and 99% confiden
 <div class="layout-chunk" data-layout="l-body-outset">
 
 ```{=html}
-<div id="htmlwidget-9b8ac0136f24729ff96c" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-9b8ac0136f24729ff96c">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9"],["NO2","NO2","NO2","O3","O3","O3","PM10","PM10","PM10"],[-1,0,1,-1,0,1,-1,0,1],[0.4,0.4,2.3,-0.5,0.3,3.5,-0.8,3.7,7],[-2,-1.7,-0.2,-3.6,-2,0.7,-3.1,1.3,4.4],[2.7,2.6,4.8,2.7,2.7,6.3,1.5,6.2,9.7],[-2.7,-2.4,-0.9,-4.6,-2.7,-0.2,-3.8,0.5,3.5],[3.5,3.3,5.6,3.7,3.4,7.2,2.2,6.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Fisherian Interval<\/th>\n      <th>Upper Bound of the 95% Fisherian Interval<\/th>\n      <th>Lower Bound of the 99% Confidence Interval<\/th>\n      <th>Upper Bound of the 99% Confidence Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-43e7c49aa8109064e5ac" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-43e7c49aa8109064e5ac">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9"],["NO2","NO2","NO2","O3","O3","O3","PM10","PM10","PM10"],[-1,0,1,-1,0,1,-1,0,1],[0.4,0.4,2.3,-0.5,0.3,3.5,-0.8,3.7,7],[-2,-1.7,-0.2,-3.6,-2,0.7,-3.1,1.3,4.4],[2.7,2.6,4.8,2.7,2.7,6.3,1.5,6.2,9.7],[-2.7,-2.4,-0.9,-4.6,-2.7,-0.2,-3.8,0.5,3.5],[3.5,3.3,5.6,3.7,3.4,7.2,2.2,6.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Fisherian Interval<\/th>\n      <th>Upper Bound of the 95% Fisherian Interval<\/th>\n      <th>Lower Bound of the 99% Confidence Interval<\/th>\n      <th>Upper Bound of the 99% Confidence Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -479,8 +479,8 @@ We display below the estimates for the ATE and the associated 95% and 99% confid
 <div class="layout-chunk" data-layout="l-body-outset">
 
 ```{=html}
-<div id="htmlwidget-20720dc8d41d8417a4f7" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-20720dc8d41d8417a4f7">{"x":{"filter":"none","data":[["1","2","3"],[-1,0,1],[1.6,1.2,3.8],[-3,-2.9,-0.2],[6.1,5.3,7.7],[-4.4,-4.2,-1.4],[7.6,6.6,9]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Confidence Interval<\/th>\n      <th>Upper Bound of the 95% Confidence Interval<\/th>\n      <th>Lower Bound of the 99% Confidence Interval<\/th>\n      <th>Upper Bound of the 99% Confidence Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-7a988bdaf99f21f54a30" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7a988bdaf99f21f54a30">{"x":{"filter":"none","data":[["1","2","3"],[-1,0,1],[1.6,1.2,3.8],[-3,-2.9,-0.2],[6.1,5.3,7.7],[-4.4,-4.2,-1.4],[7.6,6.6,9]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Confidence Interval<\/th>\n      <th>Upper Bound of the 95% Confidence Interval<\/th>\n      <th>Lower Bound of the 99% Confidence Interval<\/th>\n      <th>Upper Bound of the 99% Confidence Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -710,8 +710,8 @@ We select the pair differences for PM$_{10}$ concentrations in $t$ and run the f
 </code></pre></div>
 
 ```{=html}
-<div id="htmlwidget-d8bb050c785f1047501e" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d8bb050c785f1047501e">{"x":{"filter":"none","data":[["1"],[2],[-2.28],[9.98]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-7d8c4fda2a011236cf72" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7d8c4fda2a011236cf72">{"x":{"filter":"none","data":[["1"],[2],[-2.28],[9.97]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -742,8 +742,8 @@ We then implement the same procedure but for concentrations in $t+1$:
 </code></pre></div>
 
 ```{=html}
-<div id="htmlwidget-e7a67828fc144a99615d" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e7a67828fc144a99615d">{"x":{"filter":"none","data":[["1"],[2],[0.2],[14]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-205def6abb532ca6fc9d" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-205def6abb532ca6fc9d">{"x":{"filter":"none","data":[["1"],[2],[0.2],[13.99]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -811,8 +811,8 @@ To check that our pair matching procedure improves precsision, we compare the es
 </code></pre></div>
 
 ```{=html}
-<div id="htmlwidget-6eda7b839386c70cd5c7" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6eda7b839386c70cd5c7">{"x":{"filter":"none","data":[["1","2","3"],["NO2","O3","PM10"],[1.1,1.19,1.24],[1.74,3.02,1.74],[-37,-61,-29]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>S.E Pair Experiment<\/th>\n      <th>S.E Complete Experiment<\/th>\n      <th>Precision Improvement (%)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-9fcc2f799fd588a77788" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9fcc2f799fd588a77788">{"x":{"filter":"none","data":[["1","2","3"],["NO2","O3","PM10"],[1.1,1.19,1.24],[1.74,3.02,1.74],[-37,-61,-29]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>S.E Pair Experiment<\/th>\n      <th>S.E Complete Experiment<\/th>\n      <th>Precision Improvement (%)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
