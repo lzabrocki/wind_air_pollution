@@ -1,0 +1,289 @@
+---
+title: "Map of Marseille Context"
+description: |
+  Script for reproducing the map
+author:
+  - name: Léo Zabrocki 
+    url: https://lzabrocki.github.io/
+    affiliation: Paris School of Economics
+    affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
+  - name: Anna Alari 
+    url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
+    affiliation: ISGlobal
+    affiliation_url: https://www.isglobal.org/
+  - name: Tarik Benmarhnia
+    url: https://profiles.ucsd.edu/tarik.benmarhnia
+    affiliation: UCSD & Scripps Institute
+    affiliation_url: https://benmarhniaresearch.ucsd.edu/
+date: "`r Sys.Date()`"
+output: 
+    distill::distill_article:
+      keep_md: true
+      toc: true
+      toc_depth: 2
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+# code chunk option
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  layout="l-body-outset",
+  dev = "CairoPNG",
+  dpi = 300
+)
+```
+
+# Required Packages
+
+We load the required packages:
+
+```{r}
+# load required packages
+library(here) # for files paths organization
+library(tidyverse) # for data manipulation and visualization
+library(osmdata) # for retrieving open street map data
+library(sf) # for simple features access
+library(Cairo) # for printing custom police of graphs
+```
+
+We also load our custom `ggplot2` theme for graphs:
+
+```{r}
+# load ggplot custom theme
+source(here::here(
+  "2.scripts",
+  "4.custom_ggplot2_theme",
+  "script_theme_tufte.R"
+))
+# define nice colors
+my_blue <- "#0081a7"
+my_orange <- "#fb8500"
+```
+
+# Gathering the data
+
+### Roads data
+
+Using the `osmdata` package, we retrieve Paris's network of roads:
+
+```{r}
+# motorway roads data
+data_motorway <- opq(bbox = c(2.2, 48.8, 2.5, 48.95)) %>% 
+  add_osm_feature(key =  "highway", value = "motorway") %>%
+  osmdata_sf()
+
+# trunk roads data
+data_trunk <- opq(bbox = c(2.2, 48.8, 2.5, 48.95)) %>% 
+  add_osm_feature(key =  "highway", value = "trunk") %>%
+  osmdata_sf()
+
+# primary roads data
+data_primary <- opq(bbox = c(2.2, 48.8, 2.5, 48.95)) %>% 
+  add_osm_feature(key =  "highway", value = "primary") %>%
+  osmdata_sf()
+
+# secondary roads data
+data_secondary <- opq(bbox = c(2.2, 48.8, 2.5, 48.95)) %>% 
+  add_osm_feature(key =  "highway", value = "secondary") %>%
+  osmdata_sf()
+
+# tertiary roads data
+data_tertiary <- opq(bbox = c(2.2, 48.8, 2.5, 48.95)) %>% 
+  add_osm_feature(key =  "highway", value = "tertiary") %>%
+  osmdata_sf()
+
+# unclassified roads data
+data_unclassified <- opq(bbox = c(2.2, 48.8, 2.5, 48.95)) %>% 
+  add_osm_feature(key =  "highway", value = "unclassified") %>%
+  osmdata_sf()
+
+# unclassified roads data
+data_residential <- opq(bbox = c(2.2, 48.8, 2.5, 48.95)) %>% 
+  add_osm_feature(key =  "highway", value = "residential") %>%
+  osmdata_sf()
+
+# orbital ring data
+data_orbital_ring <- getbb("paris") %>%
+  opq() %>%
+  add_osm_feature(key = "highway", value = "trunk") %>%
+  osmdata_sf()
+
+# water data
+data_water <- getbb("paris") %>%
+  opq() %>%
+  add_osm_feature("water") %>%
+  osmdata_sf()
+```` 
+
+### Air pollution measuring stations data
+
+We retrieve the coordinates of measuring stations located in Paris from [https://www.airparif.asso.fr/accueil-airparif](Airparif)'s website:
+
+```{r}
+# create air pollution measuring stations data
+data_stations <-
+  tibble(
+    latitude = c(
+      48.86262,
+      48.85948,
+      48.8562317,
+      48.8574108,
+      48.8374685,
+      48.8288584,
+      48.8279531,
+      48.8918732
+    ),
+    longitude = c(
+      2.34493,
+      2.35169,
+      2.3343441,
+      2.2930813,
+      2.3940801,
+      2.3593128,
+      2.2723145,
+      2.3460342
+    ),
+    name = c("PA01H", "PA04C", "PA06", "PA07", "PA12", "PA13", "PA15L", "PA18")
+  )
+
+# set the crs
+data_stations <- st_as_sf(data_stations,
+                          coords = c('longitude', 'latitude'),
+                          crs = "+init=epsg:4326")
+
+# retrieve station coordinates for labeling their names on the map
+stations_coordinates <-
+  as.data.frame(st_transform(data_stations, 2154) %>%
+                  st_coordinates(.))
+stations_coordinates$name <- data_stations$name
+````
+
+# Making the map
+
+```{r}
+# we first store a vector of colors to create the legend
+colors <- c("Stations" = my_blue)
+
+# make the map
+map_paris <- ggplot() +
+    # seine rive
+  geom_sf(data = data_water$osm_multipolygons,
+          fill = "#a9d3ff") + 
+  # road networks 
+  geom_sf(data = data_residential$osm_lines,
+          colour = "#adb5bd",
+          size = 0.1) + 
+  geom_sf(data = data_unclassified$osm_lines,
+          colour = "#6c757d",
+          size = 0.2) +
+  geom_sf(data = data_tertiary$osm_lines,
+          colour = "#6c757d",
+          size = 0.3) +
+  geom_sf(data = data_secondary$osm_lines,
+          colour = "#6c757d",
+          size = 0.4) +
+  geom_sf(data = data_primary$osm_lines,
+          colour = "#495057",
+          size = 0.5) +
+  geom_sf(data = data_trunk$osm_lines,
+          colour = "#343a40",
+          size = 0.6) +
+  geom_sf(data = data_motorway$osm_lines,
+          colour = "#212529",
+          size = 0.8) +
+  geom_sf(data = data_orbital_ring$osm_lines,
+          colour = my_orange,
+          size = 0.8) +
+  # station coordinates
+  geom_sf(
+    data = data_stations,
+    aes(colour = "Stations"),
+    shape = 3,
+    stroke = 2.5,
+    size = 4
+  ) + 
+  # station labels
+  ggrepel::geom_text_repel(
+    data = stations_coordinates,
+    aes(X, Y, label = name),
+    point.padding = 3,
+    segment.color = NA,
+    size = 12,
+    fontface = 'bold'
+  ) +
+  # axes labels
+  xlab('Longitude') + ylab('Latitude') +
+  # add scale
+  ggspatial::annotation_scale(
+    location = "br",
+    line_width = 0.5,
+    height = unit(0.2, "cm")
+  ) +
+  # add north arrow
+  ggspatial::annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    height = unit(1, "cm"),
+    width = unit(1, "cm")
+  ) +
+  # zoom on the map
+  coord_sf(
+    crs = st_crs(2154),
+    xlim = c(643500, 658789),
+    ylim = c(6857100, 6867897),
+    expand = FALSE
+  ) +
+  scale_color_manual(name = "Legend:", values = colors) +
+  theme_tufte() +
+  # theme options
+  theme(
+    panel.border = element_rect(color = "black", fill = NA, size = 0.8),
+    panel.background = element_rect(fill = NA),
+    panel.grid.major = element_blank(),
+    # axis titles parameters
+    axis.title.x = element_text(
+      size = 36,
+      face = "bold",
+      margin = margin(
+        t = 20,
+        r = 0,
+        b = 0,
+        l = 0
+      )
+    ),
+    axis.title.y = element_text(
+      size = 36,
+      face = "bold",
+      margin = margin(
+        t = 0,
+        r = 20,
+        b = 0,
+        l = 0
+      )
+    ),
+    # axis texts
+    axis.text.x = element_text(size = 20),
+    axis.text.y = element_text(size = 20),
+    # legend parameters
+    legend.title = element_text(size = 36, face = "bold"),
+    legend.text = element_text(size = 28)
+  )
+
+
+# save the map
+ggsave(
+  map_paris,
+  filename = here::here("3.outputs", "1.eda", "map_paris.pdf"),
+  width = 40,
+  height = 28,
+  units = "cm",
+  device = cairo_pdf
+)
+````
