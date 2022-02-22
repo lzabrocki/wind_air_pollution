@@ -9,8 +9,8 @@ author:
     affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
   - name: Anna Alari 
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
-    affiliation: Sorbonne Université & INSERM
-    affiliation_url: https://www.inserm.fr/
+    affiliation: ISGlobal
+    affiliation_url: https://www.isglobal.org/
   - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
@@ -311,7 +311,8 @@ graph_love_plot_rainfall <- data_weather_categorical %>%
   xlab("Absolute Difference in Percentage Points") +
   ylab("") +
   theme_tufte() +
-  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")))
+  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")),
+        axis.text.y = element_text(hjust = 1))
 
 # print the figure for rainfall dummy
 graph_love_plot_rainfall
@@ -399,7 +400,8 @@ graph_love_plot_pollutants <-
   xlab("Standardized Mean Differences") +
   ylab("") +
   theme_tufte() +
-  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")))
+  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")),
+        axis.text.y = element_text(hjust = 1))
 
 # print the graph
 graph_love_plot_pollutants
@@ -537,7 +539,8 @@ graph_love_plot_weekday <- data_calendar %>%
   xlab("Absolute Difference in Percentage Points") +
   ylab("") +
   theme_tufte() +
-  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")))
+  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")),
+        axis.text.y = element_text(hjust = 1))
 
 
 # print the plot
@@ -596,7 +599,8 @@ graph_love_plot_month <- data_calendar %>%
   xlab("Absolute Difference in Percentage Points") +
   ylab("") +
   theme_tufte() +
-  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")))
+  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")),
+        axis.text.y = element_text(hjust = 1))
 
 # print the plot
 graph_love_plot_month
@@ -637,7 +641,8 @@ graph_love_plot_year <- data_calendar %>%
   xlab("Absolute Difference in Percentage Points") +
   ylab("") +
   theme_tufte() +
-  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")))
+  theme(axis.text.x = element_text(margin = ggplot2::margin(t = 0, unit = "cm")),
+        axis.text.y = element_text(hjust = 1))
 
 
 # print the graph
