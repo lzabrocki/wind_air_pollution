@@ -1,0 +1,18 @@
+variable_name;µg/m3 
+date;date of the day in year-month-day
+julian_date;index of the day from 2008 to 2018
+year;year of the day
+month;month of the day
+weekday;day of the week
+holidays_dummy;dummy equal to 1 if the day belongs to holidays
+bank_day_dummy;dummy equal to 1 if the day is a bank day
+mean_no2;concentration of nitrogen dioxide in µg/m3
+mean_o3;concentration of ozone in µg/m3
+mean_pm10;concentration of coarse particulate matters in µg/m3
+mean_pm25;concentration of fine particulate matters in µg/m3
+temperature_average;average temperature in °c
+rainfall_duration;rainfall duration in min
+humidity_average;relative humidity in %
+wind_speed;wind speed in m/s
+wind_direction;wind direction measured on 360° compass where 0° is the true north
+wind_direction_categories;wind direction divided in four categories (north-east, south-east, south-west, north-west)

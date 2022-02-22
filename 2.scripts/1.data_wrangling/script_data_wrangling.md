@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2021-11-02"
+date: "2022-02-21"
 output: 
     distill::distill_article:
       keep_md: true
@@ -41,6 +41,23 @@ We load the required packages:
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://lubridate.tidyverse.org'>lubridate</a></span><span class='op'>)</span> <span class='co'># for manipulating date variables</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/mayer79/missRanger'>missRanger</a></span><span class='op'>)</span> <span class='co'># for missing values imputation</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://www.rforge.net/Cairo/'>Cairo</a></span><span class='op'>)</span> <span class='co'># for printing custom police of graphs</span>
+</code></pre></div>
+
+</div>
+
+
+We also load our custom `ggplot2` theme for graphs:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># load ggplot custom theme</span>
+<span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span>
+  <span class='st'>"2.scripts"</span>,
+  <span class='st'>"4.custom_ggplot2_theme"</span>,
+  <span class='st'>"script_theme_tufte.R"</span>
+<span class='op'>)</span><span class='op'>)</span>
+<span class='co'># define nice colors</span>
+<span class='va'>my_blue</span> <span class='op'>&lt;-</span> <span class='st'>"#0081a7"</span>
+<span class='va'>my_orange</span> <span class='op'>&lt;-</span> <span class='st'>"#fb8500"</span>
 </code></pre></div>
 
 </div>
@@ -301,6 +318,10 @@ First, we create a dataframe with the date variable, the year, the month, and th
       <span class='st'>"Sunday"</span>
     <span class='op'>)</span>
   <span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'># create weekend dummy</span>
+<span class='va'>dates_data</span> <span class='op'>&lt;-</span> <span class='va'>dates_data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>weekend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>weekday</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Saturday"</span>, <span class='st'>"Sunday"</span><span class='op'>)</span>, <span class='st'>"Weekend"</span>, <span class='st'>"Work Days"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre></div>
 
 </div>
@@ -364,10 +385,192 @@ We merge all datasets together:
 
 # Imputing Missing Values
 
+## EDA of Missing Values
+
+We first display below the proportion (%) of missing values for each variable:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># compute proportion of missing observations</span>
+<span class='va'>data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_longer</span><span class='op'>(</span>
+    cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>wind_direction</span><span class='op'>)</span>,
+    names_to <span class='op'>=</span> <span class='st'>"Variable"</span>,
+    values_to <span class='op'>=</span> <span class='st'>"value"</span>
+  <span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>Variable</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>summarise</span><span class='op'>(</span><span class='st'>"Proportion Missing (%)"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>value</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fu'>n</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>*</span> <span class='fl'>100</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>arrange</span><span class='op'>(</span><span class='op'>-</span><span class='va'>`Proportion Missing (%)`</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>.</span>, align <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"l"</span>, <span class='st'>"c"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre></div>
+
+
+|Variable            | Proportion Missing (%) |
+|:-------------------|:----------------------:|
+|mean_pm25           |          31.1          |
+|mean_pm10_pa18      |          16.9          |
+|mean_o3_pa18        |          16.6          |
+|mean_o3_pa13        |          14.4          |
+|mean_no2_pa13       |          11.9          |
+|mean_no2_pa07       |          11.7          |
+|mean_no2_pa18       |          11.6          |
+|mean_no2_pa12       |          11.4          |
+|rainfall_duration   |          2.5           |
+|wind_direction      |          0.6           |
+|wind_speed          |          0.6           |
+|humidity_average    |          0.1           |
+|temperature_average |          0.0           |
+
+</div>
+
+
+We see that all air pollutants have at least 10% of their observations missing. To better understand when values are missing, we plot below the distribution of the missing dummy for each variable over time:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># make stripes graph</span>
+<span class='va'>graph_stripes_missing</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
+    <span class='fu'>pivot_longer</span><span class='op'>(</span>
+    cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>wind_direction</span><span class='op'>)</span>,
+    names_to <span class='op'>=</span> <span class='st'>"variable"</span>,
+    values_to <span class='op'>=</span> <span class='st'>"value"</span>
+  <span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>is_missing <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>value</span><span class='op'>)</span>, <span class='st'>"Missing"</span>, <span class='st'>"Not Missing"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>.</span>, <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>date</span>, y <span class='op'>=</span> <span class='fl'>1</span>, fill <span class='op'>=</span> <span class='va'>is_missing</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>geom_tile</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>scale_y_continuous</span><span class='op'>(</span>expand <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>facet_wrap</span><span class='op'>(</span> <span class='op'>~</span> <span class='va'>variable</span>, scales <span class='op'>=</span> <span class='st'>"free"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>scale_fill_manual</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>"Daily Observations:"</span>, values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>my_orange</span>, <span class='va'>my_blue</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Date"</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>theme</span><span class='op'>(</span>axis.ticks.y <span class='op'>=</span> <span class='fu'>element_blank</span><span class='op'>(</span><span class='op'>)</span>,
+        axis.text.y <span class='op'>=</span> <span class='fu'>element_blank</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'># display the graph</span>
+<span class='va'>graph_stripes_missing</span>
+</code></pre></div>
+![](script_data_wrangling_files/figure-html5/unnamed-chunk-15-1.png)<!-- --><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># save the graph</span>
+<span class='fu'>ggsave</span><span class='op'>(</span>
+  <span class='va'>graph_stripes_missing</span>,
+  filename <span class='op'>=</span> <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"3.outputs"</span>, <span class='st'>"1.eda"</span>, <span class='st'>"graph_stripes_missing.pdf"</span><span class='op'>)</span>,
+  width <span class='op'>=</span> <span class='fl'>30</span>,
+  height <span class='op'>=</span> <span class='fl'>15</span>,
+  units <span class='op'>=</span> <span class='st'>"cm"</span>,
+  device <span class='op'>=</span> <span class='va'>cairo_pdf</span>
+<span class='op'>)</span>
+</code></pre></div>
+
+</div>
+
+
+We can see that the station measuring PM$_{2.5}$ stopped twice recording concentrations over a long period of time. For the other pollutants, the stations stopped recording concentrations over much shorter periods. We will therefore not impute the missing values of PM$_{2.5}$ because they are missing over too long consecutive periods of days. 
+
+We can also explore how missing values are distributed by weekday:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># make graph missing weekday</span>
+<span class='va'>graph_weekday_missing</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_longer</span><span class='op'>(</span>
+    cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span>,
+    names_to <span class='op'>=</span> <span class='st'>"pollutant"</span>,
+    values_to <span class='op'>=</span> <span class='st'>"concentration"</span>
+  <span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>pollutant</span>, <span class='va'>weekday</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>summarise</span><span class='op'>(</span>proportion_missing <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>concentration</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fu'>n</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>*</span> <span class='fl'>100</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>.</span>, <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>weekday</span>, y <span class='op'>=</span> <span class='va'>proportion_missing</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>geom_segment</span><span class='op'>(</span><span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>weekday</span>, xend <span class='op'>=</span> <span class='va'>weekday</span>, y <span class='op'>=</span> <span class='fl'>0</span>, yend <span class='op'>=</span> <span class='va'>proportion_missing</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>geom_point</span><span class='op'>(</span>colour <span class='op'>=</span> <span class='va'>my_orange</span>, size <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>facet_wrap</span><span class='op'>(</span><span class='op'>~</span> <span class='va'>pollutant</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Day of the Week"</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>"Missing Proportion (%)"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span>
+  
+  
+<span class='co'># display the graph</span>
+<span class='va'>graph_weekday_missing</span>
+</code></pre></div>
+![](script_data_wrangling_files/figure-html5/unnamed-chunk-16-1.png)<!-- --><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># save the graph</span>
+<span class='fu'>ggsave</span><span class='op'>(</span>
+  <span class='va'>graph_weekday_missing</span>,
+  filename <span class='op'>=</span> <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"3.outputs"</span>, <span class='st'>"1.eda"</span>, <span class='st'>"graph_weekday_missing.pdf"</span><span class='op'>)</span>,
+  width <span class='op'>=</span> <span class='fl'>40</span>,
+  height <span class='op'>=</span> <span class='fl'>20</span>,
+  units <span class='op'>=</span> <span class='st'>"cm"</span>,
+  device <span class='op'>=</span> <span class='va'>cairo_pdf</span>
+<span class='op'>)</span>  
+</code></pre></div>
+
+</div>
+
+
+We see that missing concentrations occur less on weekends. We make the same plot but by month:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># make graph missing month</span>
+<span class='va'>graph_month_missing</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_longer</span><span class='op'>(</span>
+    cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span>,
+    names_to <span class='op'>=</span> <span class='st'>"pollutant"</span>,
+    values_to <span class='op'>=</span> <span class='st'>"concentration"</span>
+  <span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>pollutant</span>, <span class='va'>month</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>summarise</span><span class='op'>(</span>proportion_missing <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>concentration</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fu'>n</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>*</span> <span class='fl'>100</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>.</span>, <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>month</span>, y <span class='op'>=</span> <span class='va'>proportion_missing</span>, group <span class='op'>=</span> <span class='st'>"l"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>geom_line</span><span class='op'>(</span>colour <span class='op'>=</span> <span class='st'>"gray80"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>geom_point</span><span class='op'>(</span>colour <span class='op'>=</span> <span class='va'>my_orange</span>, size <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>facet_wrap</span><span class='op'>(</span><span class='op'>~</span> <span class='va'>pollutant</span>, ncol <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Month"</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>"Missing Proportion (%)"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span>
+  
+<span class='co'># display the graph</span>
+<span class='va'>graph_month_missing</span>
+</code></pre></div>
+![](script_data_wrangling_files/figure-html5/unnamed-chunk-17-1.png)<!-- --><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># save the graph</span>
+<span class='fu'>ggsave</span><span class='op'>(</span>
+  <span class='va'>graph_month_missing</span>,
+  filename <span class='op'>=</span> <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"3.outputs"</span>, <span class='st'>"1.eda"</span>, <span class='st'>"graph_month_missing.pdf"</span><span class='op'>)</span>,
+  width <span class='op'>=</span> <span class='fl'>28</span>,
+  height <span class='op'>=</span> <span class='fl'>40</span>,
+  units <span class='op'>=</span> <span class='st'>"cm"</span>,
+  device <span class='op'>=</span> <span class='va'>cairo_pdf</span>
+<span class='op'>)</span>  
+</code></pre></div>
+
+</div>
+
+
+We do not see a clear pattern of missingness depending on the month of year. Overall, missing values are not missing completely are random but we can use values from past and future periods and those coming from other stations to impute them.
+
+Last but not least, before imputing the missing values, we save a dataset with the observed concentrations aggregated at the city-level. This dataset will be used as a robutness check to see if our results depend on our imputation procedure.
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># aggregation of each pollutant's concentrations at the city level</span>
+<span class='co'># when concentrations are not imputed</span>
+<span class='va'>data_not_imputed</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>date</span>,<span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>rowwise</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>mean_no2 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>
+    <span class='va'>mean_no2_pa07</span>, <span class='va'>mean_no2_pa12</span>, <span class='va'>mean_no2_pa13</span>, <span class='va'>mean_no2_pa18</span>
+  <span class='op'>)</span><span class='op'>)</span>,
+  mean_o3 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_o3_pa13</span>, <span class='va'>mean_o3_pa18</span><span class='op'>)</span><span class='op'>)</span>,
+  mean_pm10 <span class='op'>=</span> <span class='va'>mean_pm10_pa18</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>date</span>, <span class='va'>mean_no2</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>rename_at</span><span class='op'>(</span><span class='fu'>vars</span><span class='op'>(</span><span class='va'>mean_no2</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span>, <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"not_imputed"</span>, <span class='va'>.</span>, sep <span class='op'>=</span> <span class='st'>"_"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span>
+
+<span class='co'># save the dataset</span>
+<span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>data_not_imputed</span>, <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"1.data"</span>, <span class='st'>"4.data_for_analysis"</span>, <span class='st'>"data_pollutants_not_imputed.RDS"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre></div>
+
+</div>
+
+
+## Using Chained Random Forest for Imputation
+
 We impute missing values using the `missRanger` package:
 
 <div class="layout-chunk" data-layout="l-body-outset">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># imputation of missing values</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># set the seed</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>42</span><span class='op'>)</span>
+
+<span class='co'># imputation of missing values</span>
 <span class='va'>data</span> <span class='op'>&lt;-</span> <span class='fu'>missRanger</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/missRanger/man/missRanger.html'>missRanger</a></span><span class='op'>(</span>
   <span class='va'>data</span>,
   <span class='co'># variables to impute</span>
@@ -384,7 +587,7 @@ We impute missing values using the `missRanger` package:
     <span class='va'>wind_direction</span> <span class='op'>-</span>
     <span class='va'>mean_pm25</span> <span class='op'>~</span>
     <span class='co'># variables used for the imputation</span>
-    <span class='va'>.</span> <span class='op'>-</span> <span class='va'>date</span> <span class='op'>-</span> <span class='va'>julian_date</span> <span class='op'>-</span> <span class='va'>holidays_name</span> <span class='op'>-</span> <span class='va'>name_bank_day</span>,
+    <span class='va'>.</span> <span class='op'>-</span> <span class='va'>date</span> <span class='op'>-</span> <span class='va'>julian_date</span> <span class='op'>-</span> <span class='va'>weekend</span> <span class='op'>-</span> <span class='va'>holidays_name</span> <span class='op'>-</span> <span class='va'>name_bank_day</span>,
   pmm.k <span class='op'>=</span> <span class='fl'>10</span>,
   num.trees <span class='op'>=</span> <span class='fl'>100</span>
 <span class='op'>)</span>
@@ -400,6 +603,7 @@ iter 1:	...........
 iter 2:	...........
 iter 3:	...........
 iter 4:	...........
+iter 5:	...........
 ```
 
 </div>
@@ -461,12 +665,20 @@ We finally select relevant variables and save the data:
     <span class='va'>mean_o3</span>,
     <span class='va'>mean_pm10</span>,
     <span class='va'>mean_pm25</span>,
+    <span class='va'>mean_no2_pa07</span>,
+    <span class='va'>mean_no2_pa12</span>,
+    <span class='va'>mean_no2_pa13</span>,
+    <span class='va'>mean_no2_pa18</span>,
+    <span class='va'>mean_o3_pa13</span>,
+    <span class='va'>mean_o3_pa18</span>,
+    <span class='va'>mean_pm10_pa18</span>,
+    <span class='va'>mean_pm25</span>,
     <span class='va'>temperature_average</span><span class='op'>:</span><span class='va'>wind_speed</span>,
     <span class='va'>wind_direction</span>,
     <span class='va'>wind_direction_categories</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>.</span>,
-          <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"1.data"</span>, <span class='st'>"5.data_for_analysis"</span>, <span class='st'>"data_for_analysis.RDS"</span><span class='op'>)</span><span class='op'>)</span>
+          <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"1.data"</span>, <span class='st'>"4.data_for_analysis"</span>, <span class='st'>"data_for_analysis.RDS"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre></div>
 
 </div>

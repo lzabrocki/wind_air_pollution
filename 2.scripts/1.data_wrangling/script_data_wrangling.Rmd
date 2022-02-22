@@ -53,6 +53,20 @@ library(missRanger) # for missing values imputation
 library(Cairo) # for printing custom police of graphs
 ```
 
+We also load our custom `ggplot2` theme for graphs:
+
+```{r}
+# load ggplot custom theme
+source(here::here(
+  "2.scripts",
+  "4.custom_ggplot2_theme",
+  "script_theme_tufte.R"
+))
+# define nice colors
+my_blue <- "#0081a7"
+my_orange <- "#fb8500"
+```
+
 # Cleaning Air Pollution Data
 
 We load and clean NO$_{2}$ data:
@@ -287,6 +301,10 @@ dates_data <- dates_data %>%
       "Sunday"
     )
   ))
+
+# create weekend dummy
+dates_data <- dates_data %>%
+  mutate(weekend = ifelse(weekday %in% c("Saturday", "Sunday"), "Weekend", "Work Days"))
 ````
 
 Then, we load two datasets on holidays and bank days indicators:
@@ -338,9 +356,159 @@ data <- left_join(data_calendar, data_pollutants, by = "date") %>%
 
 # Imputing Missing Values
 
+## EDA of Missing Values
+
+We first display below the proportion (%) of missing values for each variable:
+
+```{r}
+# compute proportion of missing observations
+data %>%
+  pivot_longer(
+    cols = c(mean_no2_pa07:wind_direction),
+    names_to = "Variable",
+    values_to = "value"
+  ) %>%
+  group_by(Variable) %>%
+  summarise("Proportion Missing (%)" = round(sum(is.na(value)) / n() * 100, 1)) %>%
+  arrange(-`Proportion Missing (%)`) %>%
+  knitr::kable(., align = c("l", "c"))
+```` 
+
+We see that all air pollutants have at least 10% of their observations missing. To better understand when values are missing, we plot below the distribution of the missing dummy for each variable over time:
+
+```{r, fig.width=10, fig.height=8}
+# make stripes graph
+graph_stripes_missing <- data %>%
+    pivot_longer(
+    cols = c(mean_no2_pa07:wind_direction),
+    names_to = "variable",
+    values_to = "value"
+  ) %>%
+  mutate(is_missing = ifelse(is.na(value), "Missing", "Not Missing")) %>%
+  ggplot(., aes(x = date, y = 1, fill = is_missing)) +
+  geom_tile() +
+  scale_y_continuous(expand = c(0, 0)) +
+  facet_wrap( ~ variable, scales = "free") +
+  scale_fill_manual(name = "Daily Observations:", values = c(my_orange, my_blue)) +
+  xlab("Date") + ylab("") +
+  theme_tufte() +
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
+
+# display the graph
+graph_stripes_missing
+
+# save the graph
+ggsave(
+  graph_stripes_missing,
+  filename = here::here("3.outputs", "1.eda", "graph_stripes_missing.pdf"),
+  width = 30,
+  height = 15,
+  units = "cm",
+  device = cairo_pdf
+)
+```` 
+
+We can see that the station measuring PM$_{2.5}$ stopped twice recording concentrations over a long period of time. For the other pollutants, the stations stopped recording concentrations over much shorter periods. We will therefore not impute the missing values of PM$_{2.5}$ because they are missing over too long consecutive periods of days. 
+
+We can also explore how missing values are distributed by weekday:
+
+```{r, fig.width=15, fig.height=8}
+# make graph missing weekday
+graph_weekday_missing <- data %>%
+  pivot_longer(
+    cols = c(mean_no2_pa07:mean_pm25),
+    names_to = "pollutant",
+    values_to = "concentration"
+  ) %>%
+  group_by(pollutant, weekday) %>%
+  summarise(proportion_missing = sum(is.na(concentration)) / n() * 100) %>%
+  ggplot(., aes(x = weekday, y = proportion_missing)) +
+  geom_segment(aes(x = weekday, xend = weekday, y = 0, yend = proportion_missing), size = 0.5) +
+  geom_point(colour = my_orange, size = 4) +
+  facet_wrap(~ pollutant) +
+  xlab("Day of the Week") + ylab("Missing Proportion (%)") +
+  theme_tufte()
+  
+  
+# display the graph
+graph_weekday_missing
+
+# save the graph
+ggsave(
+  graph_weekday_missing,
+  filename = here::here("3.outputs", "1.eda", "graph_weekday_missing.pdf"),
+  width = 40,
+  height = 20,
+  units = "cm",
+  device = cairo_pdf
+)  
+```` 
+
+We see that missing concentrations occur less on weekends. We make the same plot but by month:
+
+```{r, fig.width=10, fig.height=20}
+# make graph missing month
+graph_month_missing <- data %>%
+  pivot_longer(
+    cols = c(mean_no2_pa07:mean_pm25),
+    names_to = "pollutant",
+    values_to = "concentration"
+  ) %>%
+  group_by(pollutant, month) %>%
+  summarise(proportion_missing = sum(is.na(concentration)) / n() * 100) %>%
+  ggplot(., aes(x = month, y = proportion_missing, group = "l")) +
+  geom_line(colour = "gray80") +
+  geom_point(colour = my_orange, size = 4) +
+  facet_wrap(~ pollutant, ncol = 1) +
+  xlab("Month") + ylab("Missing Proportion (%)") +
+  theme_tufte()
+  
+# display the graph
+graph_month_missing
+
+# save the graph
+ggsave(
+  graph_month_missing,
+  filename = here::here("3.outputs", "1.eda", "graph_month_missing.pdf"),
+  width = 28,
+  height = 40,
+  units = "cm",
+  device = cairo_pdf
+)  
+````
+
+We do not see a clear pattern of missingness depending on the month of year. Overall, missing values are not missing completely are random but we can use values from past and future periods and those coming from other stations to impute them.
+
+Last but not least, before imputing the missing values, we save a dataset with the observed concentrations aggregated at the city-level. This dataset will be used as a robutness check to see if our results depend on our imputation procedure.
+
+```{r}
+# aggregation of each pollutant's concentrations at the city level
+# when concentrations are not imputed
+data_not_imputed <- data %>%
+  select(date,mean_no2_pa07:mean_pm25) %>%
+  rowwise() %>%
+  mutate(mean_no2 = mean(c(
+    mean_no2_pa07, mean_no2_pa12, mean_no2_pa13, mean_no2_pa18
+  )),
+  mean_o3 = mean(c(mean_o3_pa13, mean_o3_pa18)),
+  mean_pm10 = mean_pm10_pa18) %>%
+  select(date, mean_no2:mean_pm25) %>%
+  rename_at(vars(mean_no2:mean_pm25), ~ paste("not_imputed", ., sep = "_")) %>%
+  ungroup()
+
+# save the dataset
+saveRDS(data_not_imputed, here::here("1.data", "4.data_for_analysis", "data_pollutants_not_imputed.RDS"))
+```` 
+
+## Using Chained Random Forest for Imputation
+
 We impute missing values using the `missRanger` package:
 
 ```{r}
+# set the seed
+set.seed(42)
+
 # imputation of missing values
 data <- missRanger::missRanger(
   data,
@@ -358,7 +526,7 @@ data <- missRanger::missRanger(
     wind_direction -
     mean_pm25 ~
     # variables used for the imputation
-    . - date - julian_date - holidays_name - name_bank_day,
+    . - date - julian_date - weekend - holidays_name - name_bank_day,
   pmm.k = 10,
   num.trees = 100
 )
@@ -414,12 +582,20 @@ data %>%
     mean_o3,
     mean_pm10,
     mean_pm25,
+    mean_no2_pa07,
+    mean_no2_pa12,
+    mean_no2_pa13,
+    mean_no2_pa18,
+    mean_o3_pa13,
+    mean_o3_pa18,
+    mean_pm10_pa18,
+    mean_pm25,
     temperature_average:wind_speed,
     wind_direction,
     wind_direction_categories
   ) %>%
   saveRDS(.,
-          here::here("1.data", "5.data_for_analysis", "data_for_analysis.RDS"))
+          here::here("1.data", "4.data_for_analysis", "data_for_analysis.RDS"))
 ```` 
 
 
