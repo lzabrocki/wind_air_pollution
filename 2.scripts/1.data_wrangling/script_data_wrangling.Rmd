@@ -493,8 +493,8 @@ data_not_imputed <- data %>%
   )),
   mean_o3 = mean(c(mean_o3_pa13, mean_o3_pa18)),
   mean_pm10 = mean_pm10_pa18) %>%
-  select(date, mean_no2:mean_pm25) %>%
-  rename_at(vars(mean_no2:mean_pm25), ~ paste("not_imputed", ., sep = "_")) %>%
+  select(date, mean_pm25:mean_pm10) %>%
+  rename_at(vars(mean_pm25:mean_pm10), ~ paste("not_imputed", ., sep = "_")) %>%
   ungroup()
 
 # save the dataset
