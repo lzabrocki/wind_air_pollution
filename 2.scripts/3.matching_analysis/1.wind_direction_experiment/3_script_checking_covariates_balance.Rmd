@@ -9,8 +9,8 @@ author:
     affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
   - name: Anna Alari 
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
-    affiliation: Sorbonne Université & INSERM
-    affiliation_url: https://www.inserm.fr/
+    affiliation: ISGlobal
+    affiliation_url: https://www.isglobal.org/
   - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
