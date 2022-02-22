@@ -341,7 +341,8 @@ graph_wd_rainfall <- data %>%
              colour = "black") +
   facet_wrap( ~ wind_direction_categories, ncol = 4) +
   xlab("Proportion (%)") + ylab("") +
-  theme_tufte()
+  theme_tufte() +
+  theme(axis.text.y = element_text(hjust = 1))
 
 # display the graph
 graph_wd_rainfall
@@ -446,7 +447,7 @@ data <- data %>%
 
 ### Weather Covariates Imbalance
 
-We plot density distributions for continuous weather covariates by treatment status:
+We plot density distributions for continuous weather covariate by treatment status:
 
 ```{r, fig.width=10, fig.height=4}
 # we select control variables and store them in a long dataframe
@@ -564,7 +565,7 @@ graph_love <-
   ylab("") +
   theme_tufte() +
   theme(
-    axis.text.y = element_text(size = 10),
+    axis.text.y = element_text(hjust = 1, size = 10),
     axis.text.x = element_text(size = 10),
     panel.spacing = unit(0.5, "cm"),
     plot.margin = unit(c(0.5, 0.5, 0.5, -0.5), "cm")

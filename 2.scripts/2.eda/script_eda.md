@@ -352,7 +352,8 @@ We plot the distribution of rainfall duration by wind direction:
              colour <span class='op'>=</span> <span class='st'>"black"</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>facet_wrap</span><span class='op'>(</span> <span class='op'>~</span> <span class='va'>wind_direction_categories</span>, ncol <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Proportion (%)"</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span> <span class='op'>+</span>
-  <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span>
+  <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>theme</span><span class='op'>(</span>axis.text.y <span class='op'>=</span> <span class='fu'>element_text</span><span class='op'>(</span>hjust <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># display the graph</span>
 <span class='va'>graph_wd_rainfall</span>
@@ -469,7 +470,7 @@ The treatment is defined as follows:
 
 ### Weather Covariates Imbalance
 
-We plot density distributions for continuous weather covariates by treatment status:
+We plot density distributions for continuous weather covariate by treatment status:
 
 <div class="layout-chunk" data-layout="l-body-outset">
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># we select control variables and store them in a long dataframe</span>
@@ -590,7 +591,7 @@ We draw love plots which display the standardized mean differences between treat
   <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>theme</span><span class='op'>(</span>
-    axis.text.y <span class='op'>=</span> <span class='fu'>element_text</span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>,
+    axis.text.y <span class='op'>=</span> <span class='fu'>element_text</span><span class='op'>(</span>hjust <span class='op'>=</span> <span class='fl'>1</span>, size <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>,
     axis.text.x <span class='op'>=</span> <span class='fu'>element_text</span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>,
     panel.spacing <span class='op'>=</span> <span class='fu'>unit</span><span class='op'>(</span><span class='fl'>0.5</span>, <span class='st'>"cm"</span><span class='op'>)</span>,
     plot.margin <span class='op'>=</span> <span class='fu'>unit</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.5</span>, <span class='fl'>0.5</span>, <span class='fl'>0.5</span>, <span class='op'>-</span><span class='fl'>0.5</span><span class='op'>)</span>, <span class='st'>"cm"</span><span class='op'>)</span>
