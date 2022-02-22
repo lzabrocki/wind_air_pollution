@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2021-11-03"
+date: "2022-02-22"
 output: 
     distill::distill_article:
       keep_md: true
@@ -159,17 +159,17 @@ We change labels of the `is_treated` variable :
   <span class='fu'>summarise</span><span class='op'>(</span>abs_difference <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span><span class='op'>(</span><span class='va'>mean_values</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>]</span> <span class='op'>-</span> <span class='va'>mean_values</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='va'>data_sd_weather_continuous</span> <span class='op'>&lt;-</span>  <span class='va'>data_weather_continuous</span> <span class='op'>%&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>is_treated</span> <span class='op'>==</span> <span class='st'>"True"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>dataset</span><span class='op'>==</span> <span class='st'>"Initial Data"</span> <span class='op'>&amp;</span> <span class='va'>is_treated</span> <span class='op'>==</span> <span class='st'>"True"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>dataset</span>, <span class='va'>weather_variable</span>, <span class='va'>time</span>, <span class='va'>is_treated</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>summarise</span><span class='op'>(</span>sd_treatment <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>values</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>select</span><span class='op'>(</span><span class='va'>dataset</span>, <span class='va'>weather_variable</span>, <span class='va'>time</span>, <span class='va'>sd_treatment</span><span class='op'>)</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>weather_variable</span>, <span class='va'>time</span>, <span class='va'>sd_treatment</span><span class='op'>)</span>
 
 <span class='va'>data_love_continuous_weather</span> <span class='op'>&lt;-</span>
   <span class='fu'>left_join</span><span class='op'>(</span>
     <span class='va'>data_abs_difference_continuous_weather</span>,
     <span class='va'>data_sd_weather_continuous</span>,
-    by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"dataset"</span>, <span class='st'>"weather_variable"</span>, <span class='st'>"time"</span><span class='op'>)</span>
+    by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"weather_variable"</span>, <span class='st'>"time"</span><span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>mutate</span><span class='op'>(</span>standardized_difference <span class='op'>=</span> <span class='va'>abs_difference</span> <span class='op'>/</span> <span class='va'>sd_treatment</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>select</span><span class='op'>(</span><span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>abs_difference</span>, <span class='va'>sd_treatment</span><span class='op'>)</span><span class='op'>)</span>
@@ -372,16 +372,16 @@ We change labels of the `is_treated` variable :
   <span class='fu'>summarise</span><span class='op'>(</span>abs_difference <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span><span class='op'>(</span><span class='va'>mean_values</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>]</span> <span class='op'>-</span> <span class='va'>mean_values</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='va'>data_sd_pollutants</span> <span class='op'>&lt;-</span>  <span class='va'>data_pollutants</span> <span class='op'>%&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>is_treated</span> <span class='op'>==</span> <span class='st'>"True"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>dataset</span>, <span class='va'>pollutant</span>, <span class='va'>is_treated</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>dataset</span><span class='op'>==</span> <span class='st'>"Initial Data"</span> <span class='op'>&amp;</span> <span class='va'>is_treated</span> <span class='op'>==</span> <span class='st'>"True"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>pollutant</span>, <span class='va'>is_treated</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>summarise</span><span class='op'>(</span>sd_treatment <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>values</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>select</span><span class='op'>(</span><span class='va'>dataset</span>, <span class='va'>pollutant</span>, <span class='va'>sd_treatment</span><span class='op'>)</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>pollutant</span>, <span class='va'>sd_treatment</span><span class='op'>)</span>
 
 <span class='va'>data_love_pollutants</span> <span class='op'>&lt;-</span>
   <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>data_abs_difference_pollutants</span>,
             <span class='va'>data_sd_pollutants</span>,
-            by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"dataset"</span>, <span class='st'>"pollutant"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+            by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"pollutant"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>mutate</span><span class='op'>(</span>standardized_difference <span class='op'>=</span> <span class='va'>abs_difference</span> <span class='op'>/</span> <span class='va'>sd_treatment</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>select</span><span class='op'>(</span><span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>abs_difference</span>, <span class='va'>sd_treatment</span><span class='op'>)</span><span class='op'>)</span>
 

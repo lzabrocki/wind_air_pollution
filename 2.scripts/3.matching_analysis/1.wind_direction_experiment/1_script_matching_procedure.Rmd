@@ -240,7 +240,7 @@ thresholds$bank_day_dummy = 0
 thresholds$temperature_average = 5
 
 # thresholds for average humidity
-thresholds$humidity_average = 10
+thresholds$humidity_average = 12
 
 # threshold for wind speed
 thresholds$wind_speed = 0.5
@@ -249,7 +249,7 @@ thresholds$wind_speed = 0.5
 thresholds$rainfall_duration = 0
 
 # thresholds for pm10 in t-1
-thresholds$mean_pm10_lag_1 = 7
+thresholds$mean_pm10_lag_1 = 8
 ```
 
 ### Running the Matching Procedure

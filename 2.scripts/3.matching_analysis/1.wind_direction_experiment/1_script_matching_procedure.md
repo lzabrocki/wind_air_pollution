@@ -254,7 +254,7 @@ Below is the code to define the relevant thresholds:
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>temperature_average</span> <span class='op'>=</span> <span class='fl'>5</span>
 
 <span class='co'># thresholds for average humidity</span>
-<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>humidity_average</span> <span class='op'>=</span> <span class='fl'>10</span>
+<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>humidity_average</span> <span class='op'>=</span> <span class='fl'>12</span>
 
 <span class='co'># threshold for wind speed</span>
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>wind_speed</span> <span class='op'>=</span> <span class='fl'>0.5</span>
@@ -262,8 +262,11 @@ Below is the code to define the relevant thresholds:
 <span class='co'># threshold for rainfall duration</span>
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>rainfall_duration</span> <span class='op'>=</span> <span class='fl'>0</span>
 
+<span class='co'># thresholds for wind direction in t-1</span>
+<span class='co'>#thresholds$wind_direction_categories_lag_1 = 0</span>
+
 <span class='co'># thresholds for pm10 in t-1</span>
-<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>mean_pm10_lag_1</span> <span class='op'>=</span> <span class='fl'>7</span>
+<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>mean_pm10_lag_1</span> <span class='op'>=</span> <span class='fl'>8</span>
 </code></pre></div>
 
 </div>
@@ -364,7 +367,7 @@ For somes cases, several controls units were matched to a treatment unit. We use
 </div>
 
 
-The hypothetical experiment we set up had 912 treated units and 3106 control units. The matching procedure results in 225 matched treated units.
+The hypothetical experiment we set up had 912 treated units and 3106 control units. The matching procedure results in 270 matched treated units.
 
 We finally merge the `matched_pairs` with the `matching_matching_data` to retrieve covariates values for the matched pairs and save the data:
 
