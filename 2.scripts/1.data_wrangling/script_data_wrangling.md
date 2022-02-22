@@ -564,7 +564,136 @@ Last but not least, before imputing the missing values, we save a dataset with t
 
 ## Using Chained Random Forest for Imputation
 
-We impute missing values using the `missRanger` package:
+
+Before imputing missing values, we carry out a small simulation exercise where we keep rows without any missing values and then randomly erase 20% of the observations for two air pollutants:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># create data_test with missing values</span>
+<span class='va'>data_test_missing</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>date</span>, <span class='va'>year</span><span class='op'>:</span><span class='va'>weekday</span>, <span class='va'>holidays_dummy</span>, <span class='va'>bank_day_dummy</span>, <span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>wind_direction</span>, <span class='op'>-</span><span class='va'>mean_pm25</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+<span class='co'># drop rows with at least a missing value</span>
+  <span class='fu'>drop_na</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+<span class='co'># create an index</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'># sample rows indexes where missing values will be erased</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>42</span><span class='op'>)</span>
+<span class='va'>index_missing</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>data_test_missing</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>data_test_missing</span><span class='op'>)</span><span class='op'>*</span><span class='fl'>0.2</span>, <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'># erase values for two pollutants</span>
+<span class='va'>data_test_missing</span> <span class='op'>&lt;-</span> <span class='va'>data_test_missing</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate_at</span><span class='op'>(</span><span class='fu'>vars</span><span class='op'>(</span><span class='va'>mean_no2_pa12</span>, <span class='va'>mean_pm10_pa18</span><span class='op'>)</span>, <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>id</span> <span class='op'>%in%</span> <span class='va'>index_missing</span>, <span class='cn'>NA</span>, <span class='va'>.</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'># create data_test with observed values</span>
+<span class='va'>data_test_observed</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>date</span>, <span class='va'>year</span><span class='op'>:</span><span class='va'>weekday</span>, <span class='va'>holidays_dummy</span>, <span class='va'>bank_day_dummy</span>, <span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>wind_direction</span>, <span class='op'>-</span> <span class='va'>mean_pm25</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+<span class='co'># drop rows with at least a missing value</span>
+  <span class='fu'>drop_na</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+<span class='co'># create an index</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+<span class='co'># add dataset indicator</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>data <span class='op'>=</span> <span class='st'>"Observed"</span><span class='op'>)</span>
+</code></pre></div>
+
+</div>
+
+
+We impute the missing values using the chained forest algorithm:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># set the seed</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>42</span><span class='op'>)</span>
+
+<span class='co'># imputation of missing values</span>
+<span class='va'>data_test_imputed</span> <span class='op'>&lt;-</span> <span class='fu'>missRanger</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/missRanger/man/missRanger.html'>missRanger</a></span><span class='op'>(</span><span class='va'>data_test_missing</span>, <span class='va'>mean_no2_pa12</span> <span class='op'>+</span> <span class='va'>mean_pm10_pa18</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>-</span> <span class='va'>id</span>,
+                               pmm.k <span class='op'>=</span> <span class='fl'>10</span>,
+                               num.trees <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
+</code></pre></div>
+
+```
+
+Missing value imputation by random forests
+
+  Variables to impute:		mean_no2_pa12, mean_pm10_pa18
+  Variables used to impute:	date, year, month, weekday, holidays_dummy, bank_day_dummy, mean_no2_pa07, mean_no2_pa12, mean_no2_pa13, mean_no2_pa18, mean_o3_pa13, mean_o3_pa18, mean_pm10_pa18, temperature_average, rainfall_duration, humidity_average, wind_speed, wind_direction
+iter 1:	..
+iter 2:	..
+iter 3:	..
+```
+
+</div>
+
+
+We then compare the distribution of true and imputed concentrations for each air pollutant:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># add dataset indicator</span>
+<span class='va'>data_test_imputed</span> <span class='op'>&lt;-</span> <span class='va'>data_test_imputed</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>data <span class='op'>=</span> <span class='st'>"Imputed"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>data</span>, <span class='va'>id</span>, <span class='va'>mean_no2_pa12</span>, <span class='va'>mean_pm10_pa18</span><span class='op'>)</span>
+
+<span class='co'># bind the imputed and observed datasets</span>
+<span class='va'>data_imputation_comparison</span> <span class='op'>&lt;-</span> <span class='va'>data_test_observed</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>data</span>, <span class='va'>id</span>, <span class='va'>mean_no2_pa12</span>, <span class='va'>mean_pm10_pa18</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>bind_rows</span><span class='op'>(</span><span class='va'>.</span>, <span class='va'>data_test_imputed</span><span class='op'>)</span> 
+
+<span class='co'># plotting density distributions</span>
+<span class='va'>graph_imputation</span> <span class='op'>&lt;-</span> <span class='va'>data_imputation_comparison</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_longer</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_no2_pa12</span>, <span class='va'>mean_pm10_pa18</span><span class='op'>)</span>, names_to <span class='op'>=</span> <span class='st'>"pollutant"</span>, values_to <span class='op'>=</span> <span class='st'>"concentration"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>.</span>,  <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>concentration</span>, fill <span class='op'>=</span> <span class='va'>data</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>geom_density</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.2</span>, colour <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>scale_fill_manual</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>"Observations:"</span>, values<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>my_orange</span>, <span class='va'>my_blue</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>facet_wrap</span><span class='op'>(</span><span class='op'>~</span> <span class='va'>pollutant</span>, nrow <span class='op'>=</span> <span class='fl'>1</span>, scales <span class='op'>=</span> <span class='st'>"free_x"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>"Density"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Concentration (µg/m³)"</span><span class='op'>)</span> <span class='op'>+</span> 
+  <span class='fu'>labs</span><span class='op'>(</span>colour <span class='op'>=</span> <span class='st'>"Observations:"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span>
+
+<span class='co'># display the graph</span>
+<span class='va'>graph_imputation</span>
+</code></pre></div>
+![](script_data_wrangling_files/figure-html5/unnamed-chunk-21-1.png)<!-- --><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># save the graph</span>
+<span class='fu'>ggsave</span><span class='op'>(</span>
+  <span class='va'>graph_imputation</span>,
+  filename <span class='op'>=</span> <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"3.outputs"</span>, <span class='st'>"1.eda"</span>, <span class='st'>"graph_imputation.pdf"</span><span class='op'>)</span>,
+  width <span class='op'>=</span> <span class='fl'>15</span>,
+  height <span class='op'>=</span> <span class='fl'>10</span>,
+  units <span class='op'>=</span> <span class='st'>"cm"</span>,
+  device <span class='op'>=</span> <span class='va'>cairo_pdf</span>
+<span class='op'>)</span>  
+</code></pre></div>
+
+</div>
+
+
+We see that the two distributions overlap well. We also compute the mean absolute difference of concentrations for each pollutant:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='va'>data_imputation_comparison</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_longer</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>data</span>, <span class='va'>id</span><span class='op'>)</span>, names_to <span class='op'>=</span> <span class='st'>"Pollutant"</span>, values_to <span class='op'>=</span> <span class='st'>"concentration"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_wider</span><span class='op'>(</span>names_from <span class='op'>=</span> <span class='va'>data</span>, values_from <span class='op'>=</span> <span class='va'>concentration</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>Pollutant</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>summarise</span><span class='op'>(</span><span class='st'>"Absolute Difference"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span><span class='op'>(</span><span class='va'>Observed</span> <span class='op'>-</span> <span class='va'>Imputed</span><span class='op'>)</span><span class='op'>)</span>,
+            <span class='st'>"Mean Concentration"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>Observed</span><span class='op'>)</span>,
+            <span class='st'>"Standard Deviation"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>Observed</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate_at</span><span class='op'>(</span><span class='fu'>vars</span><span class='op'>(</span><span class='op'>-</span><span class='va'>Pollutant</span><span class='op'>)</span>, <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='va'>.</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>.</span>, align <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"l"</span>, <span class='st'>"c"</span>, <span class='st'>"c"</span>, <span class='st'>"c"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre></div>
+
+
+|Pollutant      | Absolute Difference | Mean Concentration | Standard Deviation |
+|:--------------|:-------------------:|:------------------:|:------------------:|
+|mean_no2_pa12  |         0.6         |        36.0        |        14.1        |
+|mean_pm10_pa18 |         1.4         |        23.3        |        12.2        |
+
+</div>
+
+
+The absolute difference is small. Of course, when many variables have a large fraction of missing values and missing values occurring on the same date, the algorithm could completely fail to correctly impute the values.
+
+## Actual Imputation
+
+We finally impute missing values using the `missRanger` package:
 
 <div class="layout-chunk" data-layout="l-body-outset">
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># set the seed</span>

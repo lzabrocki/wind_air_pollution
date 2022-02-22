@@ -499,11 +499,111 @@ data_not_imputed <- data %>%
 
 # save the dataset
 saveRDS(data_not_imputed, here::here("1.data", "4.data_for_analysis", "data_pollutants_not_imputed.RDS"))
-```` 
+``` 
 
 ## Using Chained Random Forest for Imputation
 
-We impute missing values using the `missRanger` package:
+
+Before imputing missing values, we carry out a small simulation exercise where we keep rows without any missing values and then randomly erase 20% of the observations for two air pollutants:
+
+```{r}
+# create data_test with missing values
+data_test_missing <- data %>%
+  select(date, year:weekday, holidays_dummy, bank_day_dummy, mean_no2_pa07:wind_direction, -mean_pm25) %>%
+# drop rows with at least a missing value
+  drop_na() %>%
+# create an index
+  mutate(id = seq(1:nrow(.)))
+
+# sample rows indexes where missing values will be erased
+set.seed(42)
+index_missing <- sample(1:nrow(data_test_missing), round(nrow(data_test_missing)*0.2, 0))
+
+# erase values for two pollutants
+data_test_missing <- data_test_missing %>%
+  mutate_at(vars(mean_no2_pa12, mean_pm10_pa18), ~ ifelse(id %in% index_missing, NA, .))
+
+# create data_test with observed values
+data_test_observed <- data %>%
+  select(date, year:weekday, holidays_dummy, bank_day_dummy, mean_no2_pa07:wind_direction, - mean_pm25) %>%
+# drop rows with at least a missing value
+  drop_na() %>%
+# create an index
+  mutate(id = seq(1:nrow(.))) %>%
+# add dataset indicator
+  mutate(data = "Observed")
+```
+
+We impute the missing values using the chained forest algorithm:
+
+```{r}
+# set the seed
+set.seed(42)
+
+# imputation of missing values
+data_test_imputed <- missRanger::missRanger(data_test_missing, mean_no2_pa12 + mean_pm10_pa18 ~ . - id,
+                               pmm.k = 10,
+                               num.trees = 100)
+```` 
+
+We then compare the distribution of true and imputed concentrations for each air pollutant:
+
+```{r, fig.width=10, fig.height=5}
+# add dataset indicator
+data_test_imputed <- data_test_imputed %>%
+  mutate(data = "Imputed") %>%
+  select(data, id, mean_no2_pa12, mean_pm10_pa18)
+
+# bind the imputed and observed datasets
+data_imputation_comparison <- data_test_observed %>%
+  select(data, id, mean_no2_pa12, mean_pm10_pa18) %>%
+  bind_rows(., data_test_imputed) 
+
+# plotting density distributions
+graph_imputation <- data_imputation_comparison %>%
+  pivot_longer(cols = c(mean_no2_pa12, mean_pm10_pa18), names_to = "pollutant", values_to = "concentration") %>%
+  ggplot(.,  aes(x = concentration, fill = data)) +
+  geom_density(alpha = 0.2, colour = NA) +
+  scale_fill_manual(name = "Observations:", values=c(my_orange, my_blue)) +
+  facet_wrap(~ pollutant, nrow = 1, scales = "free_x") +
+  ylab("Density") +
+  xlab("Concentration (µg/m³)") + 
+  labs(colour = "Observations:") +
+  theme_tufte()
+
+# display the graph
+graph_imputation
+
+# save the graph
+ggsave(
+  graph_imputation,
+  filename = here::here("3.outputs", "1.eda", "graph_imputation.pdf"),
+  width = 15,
+  height = 10,
+  units = "cm",
+  device = cairo_pdf
+)  
+```` 
+
+We see that the two distributions overlap well. We also compute the mean absolute difference of concentrations for each pollutant:
+
+```{r}
+data_imputation_comparison %>%
+  pivot_longer(cols = -c(data, id), names_to = "Pollutant", values_to = "concentration") %>%
+  pivot_wider(names_from = data, values_from = concentration) %>%
+  group_by(Pollutant) %>%
+  summarise("Absolute Difference" = mean(abs(Observed - Imputed)),
+            "Mean Concentration" = mean(Observed),
+            "Standard Deviation" = sd(Observed)) %>%
+  mutate_at(vars(-Pollutant), ~ round(., 1)) %>%
+  knitr::kable(., align = c("l", "c", "c", "c"))
+```` 
+
+The absolute difference is small. Of course, when many variables have a large fraction of missing values and missing values occurring on the same date, the algorithm could completely fail to correctly impute the values.
+
+## Actual Imputation
+
+We finally impute missing values using the `missRanger` package:
 
 ```{r}
 # set the seed
