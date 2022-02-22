@@ -160,7 +160,7 @@ N_treated = nrow(treated_units)
 N_control = nrow(control_units)
 ```
 
-There are `r N_treated` treated units and  `r N_control` control units. We display the distributionf of treated and control units through time:
+There are `r N_treated` treated units and  `r N_control` control units. We display the distribution of treated and control units through time:
 
 ```{r, fig.width=10, fig.height=4}
 # make stripes graph
@@ -227,8 +227,8 @@ names(thresholds) = colnames(matching_data)
 # threshold for julian date
 thresholds$julian_date = 60
 
-# threshold for weekday
-thresholds$weekday = 0
+# threshold for weekend
+thresholds$weekend = 0
 
 # threshold for holidays
 thresholds$holidays_dummy = 0
@@ -240,10 +240,7 @@ thresholds$bank_day_dummy = 0
 thresholds$temperature_average = 5
 
 # threshold for wind speed
-thresholds$wind_speed = 1.6
-
-# threshold for wind direction categories lag 1
-thresholds$wind_direction_categories_lag_1 = 0
+thresholds$wind_speed = 0.5
 
 # threshold for rainfall duration
 thresholds$rainfall_duration = 0

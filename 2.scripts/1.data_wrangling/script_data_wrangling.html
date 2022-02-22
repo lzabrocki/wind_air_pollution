@@ -1778,7 +1778,7 @@ text-align: justify}
 
 <span class="co"># create weekend dummy</span>
 <span class="va">dates_data</span> <span class="op">&lt;-</span> <span class="va">dates_data</span> <span class="op">%&gt;%</span>
-  <span class="fu">mutate</span><span class="op">(</span>weekend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">weekday</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">&quot;Saturday&quot;</span>, <span class="st">&quot;Sunday&quot;</span><span class="op">)</span>, <span class="st">&quot;Weekend&quot;</span>, <span class="st">&quot;Work Days&quot;</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu">mutate</span><span class="op">(</span>weekend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">weekday</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">&quot;Saturday&quot;</span>, <span class="st">&quot;Sunday&quot;</span><span class="op">)</span>, <span class="st">&quot;Weekend&quot;</span>, <span class="st">&quot;Work Days&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">as_factor</span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span>
 </code></pre>
 </div>
 </div>

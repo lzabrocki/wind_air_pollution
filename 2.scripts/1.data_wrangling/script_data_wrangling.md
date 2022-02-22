@@ -321,7 +321,7 @@ First, we create a dataframe with the date variable, the year, the month, and th
 
 <span class='co'># create weekend dummy</span>
 <span class='va'>dates_data</span> <span class='op'>&lt;-</span> <span class='va'>dates_data</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>mutate</span><span class='op'>(</span>weekend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>weekday</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Saturday"</span>, <span class='st'>"Sunday"</span><span class='op'>)</span>, <span class='st'>"Weekend"</span>, <span class='st'>"Work Days"</span><span class='op'>)</span><span class='op'>)</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>weekend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>weekday</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Saturday"</span>, <span class='st'>"Sunday"</span><span class='op'>)</span>, <span class='st'>"Weekend"</span>, <span class='st'>"Work Days"</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>as_factor</span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre></div>
 
 </div>

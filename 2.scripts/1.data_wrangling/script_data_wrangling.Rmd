@@ -304,7 +304,7 @@ dates_data <- dates_data %>%
 
 # create weekend dummy
 dates_data <- dates_data %>%
-  mutate(weekend = ifelse(weekday %in% c("Saturday", "Sunday"), "Weekend", "Work Days"))
+  mutate(weekend = ifelse(weekday %in% c("Saturday", "Sunday"), "Weekend", "Work Days") %>% as_factor(.))
 ````
 
 Then, we load two datasets on holidays and bank days indicators:

@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2021-11-03"
+date: "2022-02-22"
 output: 
     distill::distill_article:
       keep_md: true
@@ -168,7 +168,7 @@ Below are the required steps to select the corresponding treated and control uni
 </div>
 
 
-There are 829 treated units and  3189 control units. We display the distributionf of treated and control units through time:
+There are 912 treated units and  3106 control units. We display the distribution of treated and control units through time:
 
 <div class="layout-chunk" data-layout="l-body-outset">
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># make stripes graph</span>
@@ -241,8 +241,8 @@ Below is the code to define the relevant thresholds:
 <span class='co'># threshold for julian date</span>
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>julian_date</span> <span class='op'>=</span> <span class='fl'>60</span>
 
-<span class='co'># threshold for weekday</span>
-<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>weekday</span> <span class='op'>=</span> <span class='fl'>0</span>
+<span class='co'># threshold for weekend</span>
+<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>weekend</span> <span class='op'>=</span> <span class='fl'>0</span>
 
 <span class='co'># threshold for holidays</span>
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>holidays_dummy</span> <span class='op'>=</span> <span class='fl'>0</span>
@@ -254,10 +254,7 @@ Below is the code to define the relevant thresholds:
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>temperature_average</span> <span class='op'>=</span> <span class='fl'>5</span>
 
 <span class='co'># threshold for wind speed</span>
-<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>wind_speed</span> <span class='op'>=</span> <span class='fl'>1.6</span>
-
-<span class='co'># threshold for wind direction categories lag 1</span>
-<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>wind_direction_categories_lag_1</span> <span class='op'>=</span> <span class='fl'>0</span>
+<span class='va'>thresholds</span><span class='op'>$</span><span class='va'>wind_speed</span> <span class='op'>=</span> <span class='fl'>0.5</span>
 
 <span class='co'># threshold for rainfall duration</span>
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>rainfall_duration</span> <span class='op'>=</span> <span class='fl'>0</span>
@@ -361,7 +358,7 @@ For somes cases, several controls units were matched to a treatment unit. We use
 </div>
 
 
-The hypothetical experiment we set up had 829 treated units and 3189 control units. The matching procedure results in 120 matched treated units.
+The hypothetical experiment we set up had 912 treated units and 3106 control units. The matching procedure results in 494 matched treated units.
 
 We finally merge the `matched_pairs` with the `matching_matching_data` to retrieve covariates values for the matched pairs and save the data:
 
