@@ -82,7 +82,7 @@ source(here::here(
 # define nice colors
 my_blue <- "#0081a7"
 my_orange <- "#fb8500"
-````
+```
 
 The theme is based on the fantastic [hrbrthemes](https://hrbrmstr.github.io/hrbrthemes/index.html) package. If you do not want to use this theme or are unable to install it because of fonts issues, you can use the `theme_bw()` already included in the `ggplot2` package.
 
