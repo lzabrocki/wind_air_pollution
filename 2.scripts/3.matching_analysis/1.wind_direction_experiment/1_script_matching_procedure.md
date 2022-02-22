@@ -9,8 +9,8 @@ author:
     affiliation_url: https://www.parisschoolofeconomics.eu/fr/zabrocki-leo/
   - name: Anna Alari 
     url: https://scholar.google.com/citations?user=MiFY320AAAAJ&hl=fr
-    affiliation: Sorbonne Université & INSERM
-    affiliation_url: https://www.inserm.fr/
+    affiliation: ISGlobal
+    affiliation_url: https://www.isglobal.org/
   - name: Tarik Benmarhnia
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
@@ -261,9 +261,6 @@ Below is the code to define the relevant thresholds:
 
 <span class='co'># threshold for rainfall duration</span>
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>rainfall_duration</span> <span class='op'>=</span> <span class='fl'>0</span>
-
-<span class='co'># thresholds for wind direction in t-1</span>
-<span class='co'>#thresholds$wind_direction_categories_lag_1 = 0</span>
 
 <span class='co'># thresholds for pm10 in t-1</span>
 <span class='va'>thresholds</span><span class='op'>$</span><span class='va'>mean_pm10_lag_1</span> <span class='op'>=</span> <span class='fl'>8</span>
