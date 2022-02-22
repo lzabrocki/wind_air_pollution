@@ -436,7 +436,7 @@ The treatment is defined as follows:
 * control units are day winds blow from other directions in *t*.
 
 ```{r}
-# construct treatment assigment variable
+# construct treatment allocation variable
 data <- data %>%
   mutate(is_treated = ifelse(
     wind_direction_categories == "North-East",

@@ -456,7 +456,7 @@ The treatment is defined as follows:
 * control units are day winds blow from other directions in *t*.
 
 <div class="layout-chunk" data-layout="l-body-outset">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># construct treatment assigment variable</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># construct treatment allocation variable</span>
 <span class='va'>data</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
   <span class='fu'>mutate</span><span class='op'>(</span>is_treated <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span>
     <span class='va'>wind_direction_categories</span> <span class='op'>==</span> <span class='st'>"North-East"</span>,
