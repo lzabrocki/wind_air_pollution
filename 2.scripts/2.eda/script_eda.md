@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2021-11-03"
+date: "2022-02-22"
 output: 
     distill::distill_article:
       keep_md: true
@@ -330,8 +330,8 @@ We plot the distribution of rainfall duration by wind direction:
     rainfall_duration <span class='op'>=</span> <span class='fu'>case_when</span><span class='op'>(</span>
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"  0"</span> <span class='op'>~</span> <span class='st'>"0 minute"</span>,
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[  1,  13)"</span> <span class='op'>~</span> <span class='st'>"[1, 13) minutes"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[ 13, 158)"</span> <span class='op'>~</span> <span class='st'>"[13, 158) minutes"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[158,1440]"</span> <span class='op'>~</span> <span class='st'>"[158,1440] minutes"</span>
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[ 13, 159)"</span> <span class='op'>~</span> <span class='st'>"[13, 159) minutes"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[159,1440]"</span> <span class='op'>~</span> <span class='st'>"[159,1440] minutes"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>mutate</span><span class='op'>(</span>
@@ -339,8 +339,8 @@ We plot the distribution of rainfall duration by wind direction:
       <span class='va'>rainfall_duration</span>,
       <span class='st'>"0 minute"</span>,
       <span class='st'>"[1, 13) minutes"</span>,
-      <span class='st'>"[13, 158) minutes"</span>,
-      <span class='st'>"[158,1440] minutes"</span>
+      <span class='st'>"[13, 159) minutes"</span>,
+      <span class='st'>"[159,1440] minutes"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>.</span>, <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>proportion</span>, y <span class='op'>=</span> <span class='va'>rainfall_duration</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
@@ -614,6 +614,37 @@ We draw love plots which display the standardized mean differences between treat
 </div>
 
 
+We can also the imbalance and lack of overlap for the average temperature by drawing a ridgeline plot:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># make ridgeline plot for temperature</span>
+<span class='va'>graph_ridgeline_temperature</span> <span class='op'>&lt;-</span>
+  <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>data</span>, <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>temperature_average</span>, y <span class='op'>=</span> <span class='va'>month</span>, fill <span class='op'>=</span> <span class='va'>is_treated</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>ggridges</span><span class='fu'>::</span><span class='fu'><a href='https://wilkelab.org/ggridges/reference/geom_density_ridges.html'>geom_density_ridges2</a></span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.4</span>, colour <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>scale_fill_manual</span><span class='op'>(</span>values <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>my_blue</span>, <span class='va'>my_orange</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>facet_wrap</span><span class='op'>(</span><span class='op'>~</span> <span class='va'>year</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>labs</span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Average Temperatue (°C)"</span>, y <span class='op'>=</span> <span class='st'>""</span>, fill <span class='op'>=</span> <span class='st'>"Group:"</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span>
+
+<span class='co'># we print the graph</span>
+<span class='va'>graph_ridgeline_temperature</span>
+</code></pre></div>
+![](script_eda_files/figure-html5/unnamed-chunk-14-1.png)<!-- --><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># save the graph</span>
+<span class='fu'>ggsave</span><span class='op'>(</span>
+  <span class='va'>graph_ridgeline_temperature</span>,
+  filename <span class='op'>=</span> <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"3.outputs"</span>, <span class='st'>"1.eda"</span>, <span class='st'>"graph_ridgeline_temperature.pdf"</span><span class='op'>)</span>,
+  width <span class='op'>=</span> <span class='fl'>30</span>,
+  height <span class='op'>=</span> <span class='fl'>20</span>,
+  units <span class='op'>=</span> <span class='st'>"cm"</span>,
+  device <span class='op'>=</span> <span class='va'>cairo_pdf</span>
+<span class='op'>)</span>
+</code></pre></div>
+
+</div>
+
+
+
+
 ### Calendar Imbalance
 
 We plot the proportion of treated units by month:
@@ -637,7 +668,7 @@ We plot the proportion of treated units by month:
 <span class='co'># display the graph</span>
 <span class='va'>graph_treated_month</span>
 </code></pre></div>
-![](script_eda_files/figure-html5/unnamed-chunk-14-1.png)<!-- --><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># save the graph</span>
+![](script_eda_files/figure-html5/unnamed-chunk-15-1.png)<!-- --><div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># save the graph</span>
 <span class='fu'>ggsave</span><span class='op'>(</span>
   <span class='va'>graph_treated_month</span>,
   filename <span class='op'>=</span> <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"3.outputs"</span>, <span class='st'>"1.eda"</span>, <span class='st'>"graph_treated_month.pdf"</span><span class='op'>)</span>,

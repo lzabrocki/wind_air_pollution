@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2022-02-21"
+date: "2022-02-22"
 output: 
     distill::distill_article:
       keep_md: true
@@ -605,6 +605,11 @@ iter 3:	...........
 iter 4:	...........
 iter 5:	...........
 ```
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># dirty fix for wind_direction imputed values equal to 370 </span>
+<span class='va'>data</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>wind_direction <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>wind_direction</span> <span class='op'>==</span> <span class='fl'>370</span>, <span class='fl'>10</span>, <span class='va'>wind_direction</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre></div>
 
 </div>
 

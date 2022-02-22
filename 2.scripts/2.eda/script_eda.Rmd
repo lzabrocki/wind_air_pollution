@@ -319,8 +319,8 @@ graph_wd_rainfall <- data %>%
     rainfall_duration = case_when(
       rainfall_duration == "  0" ~ "0 minute",
       rainfall_duration == "[  1,  13)" ~ "[1, 13) minutes",
-      rainfall_duration == "[ 13, 158)" ~ "[13, 158) minutes",
-      rainfall_duration == "[158,1440]" ~ "[158,1440] minutes"
+      rainfall_duration == "[ 13, 159)" ~ "[13, 159) minutes",
+      rainfall_duration == "[159,1440]" ~ "[159,1440] minutes"
     )
   ) %>%
   mutate(
@@ -328,8 +328,8 @@ graph_wd_rainfall <- data %>%
       rainfall_duration,
       "0 minute",
       "[1, 13) minutes",
-      "[13, 158) minutes",
-      "[158,1440] minutes"
+      "[13, 159) minutes",
+      "[159,1440] minutes"
     )
   ) %>%
   ggplot(., aes(x = proportion, y = rainfall_duration)) +
@@ -584,6 +584,34 @@ ggsave(
   device = cairo_pdf
 )
 ````
+
+We can also the imbalance and lack of overlap for the average temperature by drawing a ridgeline plot:
+
+```{r, fig.width=10, fig.height=8}
+# make ridgeline plot for temperature
+graph_ridgeline_temperature <-
+  ggplot(data, aes(x = temperature_average, y = month, fill = is_treated)) +
+  ggridges::geom_density_ridges2(alpha = 0.4, colour = NA) +
+  scale_fill_manual(values = c(my_blue, my_orange)) +
+  facet_wrap(~ year) +
+  labs(x = "Average Temperatue (°C)", y = "", fill = "Group:") +
+  theme_tufte()
+
+# we print the graph
+graph_ridgeline_temperature
+
+# save the graph
+ggsave(
+  graph_ridgeline_temperature,
+  filename = here::here("3.outputs", "1.eda", "graph_ridgeline_temperature.pdf"),
+  width = 30,
+  height = 20,
+  units = "cm",
+  device = cairo_pdf
+)
+````
+
+
 
 ### Calendar Imbalance
 

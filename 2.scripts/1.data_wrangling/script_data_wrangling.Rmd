@@ -530,6 +530,10 @@ data <- missRanger::missRanger(
   pmm.k = 10,
   num.trees = 100
 )
+
+# dirty fix for wind_direction imputed values equal to 370 
+data <- data %>%
+  mutate(wind_direction = ifelse(wind_direction == 370, 10, wind_direction))
 ```` 
 
 # Last Cleaning Steps
