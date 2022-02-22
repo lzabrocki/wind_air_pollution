@@ -82,7 +82,7 @@ source(here::here(
 # define nice colors
 my_blue <- "#0081a7"
 my_orange <- "#fb8500"
-````
+```
 
 # Preparing the Data
 
@@ -157,17 +157,17 @@ data_abs_difference_continuous_weather <-
   summarise(abs_difference = abs(mean_values[2] - mean_values[1]))
 
 data_sd_weather_continuous <-  data_weather_continuous %>%
-  filter(is_treated == "True") %>%
+  filter(dataset== "Initial Data" & is_treated == "True") %>%
   group_by(dataset, weather_variable, time, is_treated) %>%
   summarise(sd_treatment = sd(values, na.rm = TRUE)) %>%
   ungroup() %>%
-  select(dataset, weather_variable, time, sd_treatment)
+  select(weather_variable, time, sd_treatment)
 
 data_love_continuous_weather <-
   left_join(
     data_abs_difference_continuous_weather,
     data_sd_weather_continuous,
-    by = c("dataset", "weather_variable", "time")
+    by = c("weather_variable", "time")
   ) %>%
   mutate(standardized_difference = abs_difference / sd_treatment) %>%
   select(-c(abs_difference, sd_treatment))
@@ -364,16 +364,16 @@ data_abs_difference_pollutants <- data_pollutants %>%
   summarise(abs_difference = abs(mean_values[2] - mean_values[1]))
 
 data_sd_pollutants <-  data_pollutants %>%
-  filter(is_treated == "True") %>%
-  group_by(dataset, pollutant, is_treated) %>%
+  filter(dataset== "Initial Data" & is_treated == "True") %>%
+  group_by(pollutant, is_treated) %>%
   summarise(sd_treatment = sd(values, na.rm = TRUE)) %>%
   ungroup() %>%
-  select(dataset, pollutant, sd_treatment)
+  select(pollutant, sd_treatment)
 
 data_love_pollutants <-
   left_join(data_abs_difference_pollutants,
             data_sd_pollutants,
-            by = c("dataset", "pollutant")) %>%
+            by = c("pollutant")) %>%
   mutate(standardized_difference = abs_difference / sd_treatment) %>%
   select(-c(abs_difference, sd_treatment))
 

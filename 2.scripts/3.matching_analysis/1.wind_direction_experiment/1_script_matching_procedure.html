@@ -1703,11 +1703,17 @@ text-align: justify}
 <span class="co"># thresholds for average temperature</span>
 <span class="va">thresholds</span><span class="op">$</span><span class="va">temperature_average</span> <span class="op">=</span> <span class="fl">5</span>
 
+<span class="co"># thresholds for average humidity</span>
+<span class="va">thresholds</span><span class="op">$</span><span class="va">humidity_average</span> <span class="op">=</span> <span class="fl">10</span>
+
 <span class="co"># threshold for wind speed</span>
 <span class="va">thresholds</span><span class="op">$</span><span class="va">wind_speed</span> <span class="op">=</span> <span class="fl">0.5</span>
 
 <span class="co"># threshold for rainfall duration</span>
 <span class="va">thresholds</span><span class="op">$</span><span class="va">rainfall_duration</span> <span class="op">=</span> <span class="fl">0</span>
+
+<span class="co"># thresholds for pm10 in t-1</span>
+<span class="va">thresholds</span><span class="op">$</span><span class="va">mean_pm10_lag_1</span> <span class="op">=</span> <span class="fl">7</span>
 </code></pre>
 </div>
 </div>
@@ -1801,7 +1807,7 @@ text-align: justify}
 </code></pre>
 </div>
 </div>
-<p>The hypothetical experiment we set up had 912 treated units and 3106 control units. The matching procedure results in 494 matched treated units.</p>
+<p>The hypothetical experiment we set up had 912 treated units and 3106 control units. The matching procedure results in 225 matched treated units.</p>
 <p>We finally merge the <code>matched_pairs</code> with the <code>matching_matching_data</code> to retrieve covariates values for the matched pairs and save the data:</p>
 <div class="layout-chunk" data-layout="l-body-outset">
 <div class="sourceCode">
