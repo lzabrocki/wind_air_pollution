@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2022-02-23"
+date: "2022-02-24"
 output: 
     distill::distill_article:
       keep_md: true
@@ -412,8 +412,8 @@ We display below the table with the point estimates and the 95% and 99% confiden
 <div class="layout-chunk" data-layout="l-body-outset">
 
 ```{=html}
-<div id="htmlwidget-7e0460932777b732a338" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7e0460932777b732a338">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9"],["NO2","NO2","NO2","O3","O3","O3","PM10","PM10","PM10"],[-1,0,1,-1,0,1,-1,0,1],[-0.3,0.2,1.1,-0.5,0.4,3.3,0.6,4.8,5.6],[-3.7,-3.1,-2.9,-3.7,-2.3,-0.6,-0.1,2.8,3.2],[3,3.6,5.1,2.6,3.2,7.1,1.3,6.8,8.1],[-4.7,-4.2,-4.2,-4.7,-3.2,-1.8,-0.4,2.2,2.4],[4.1,4.6,6.4,3.6,4.1,8.3,1.5,7.4,8.9]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Neymanian Interval<\/th>\n      <th>Upper Bound of the 95% Neymanian Interval<\/th>\n      <th>Lower Bound of the 99% Neymanian Interval<\/th>\n      <th>Upper Bound of the 99% Neymanian Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-4bd8990f8bfc5d69ded5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4bd8990f8bfc5d69ded5">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9"],["NO2","NO2","NO2","O3","O3","O3","PM10","PM10","PM10"],[-1,0,1,-1,0,1,-1,0,1],[-1,-0.1,1.1,0,0,2.8,0.7,4.3,6.2],[-4.4,-3.4,-2.9,-3,-2.7,-1,0,2.5,3.9],[2.5,3.2,5.2,3.1,2.7,6.5,1.5,6,8.4],[-5.5,-4.5,-4.1,-4,-3.6,-2.2,-0.2,2,3.3],[3.5,4.3,6.4,4,3.6,7.7,1.7,6.5,9.1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Neymanian Interval<\/th>\n      <th>Upper Bound of the 95% Neymanian Interval<\/th>\n      <th>Lower Bound of the 99% Neymanian Interval<\/th>\n      <th>Upper Bound of the 99% Neymanian Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -480,8 +480,8 @@ We display below the estimates for the ATE and the associated 95% and 99% confid
 <div class="layout-chunk" data-layout="l-body-outset">
 
 ```{=html}
-<div id="htmlwidget-4e4f1cce5124e19be01a" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-4e4f1cce5124e19be01a">{"x":{"filter":"none","data":[["1","2","3"],[-1,0,1],[-0.3,1.8,4.5],[-1.5,0,2.6],[0.9,3.6,6.4],[-1.9,-0.5,1.9],[1.3,4.1,7]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Neymanian Interval<\/th>\n      <th>Upper Bound of the 95% Neymanian Interval<\/th>\n      <th>Lower Bound of the 99% Neymanian Interval<\/th>\n      <th>Upper Bound of the 99% Neymanian Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-d5f8316136f6902f9b2c" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d5f8316136f6902f9b2c">{"x":{"filter":"none","data":[["1","2","3"],[-1,0,1],[0.3,2.3,5.4],[-0.4,1,3.9],[0.9,3.6,6.9],[-0.6,0.6,3.4],[1.1,4,7.4]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Neymanian Interval<\/th>\n      <th>Upper Bound of the 95% Neymanian Interval<\/th>\n      <th>Lower Bound of the 99% Neymanian Interval<\/th>\n      <th>Upper Bound of the 99% Neymanian Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -518,10 +518,10 @@ We load non-imputed air pollution data and compute for each pollutant the 0-1 da
 
 |Pollutant             | Missing Proportion (%) |
 |:---------------------|:----------------------:|
-|not_imputed_mean_no2  |          44.8          |
-|not_imputed_mean_o3   |          31.1          |
-|not_imputed_mean_pm10 |          19.1          |
-|not_imputed_mean_pm25 |          34.8          |
+|not_imputed_mean_no2  |          16.6          |
+|not_imputed_mean_o3   |          10.7          |
+|not_imputed_mean_pm10 |          10.1          |
+|not_imputed_mean_pm25 |          28.4          |
 
 </div>
 
@@ -964,8 +964,8 @@ We select the pair differences for PM$_{10}$ concentrations in $t$ and run the f
 </code></pre></div>
 
 ```{=html}
-<div id="htmlwidget-ae92ed2a59be9894055e" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-ae92ed2a59be9894055e">{"x":{"filter":"none","data":[["1"],[2],[0.83],[8.93]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-05afe28c2c585e170fe5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-05afe28c2c585e170fe5">{"x":{"filter":"none","data":[["1"],[2],[0.79],[7.77]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -996,8 +996,8 @@ We then implement the same procedure but for concentrations in $t+1$:
 </code></pre></div>
 
 ```{=html}
-<div id="htmlwidget-806034fdc189550089b1" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-806034fdc189550089b1">{"x":{"filter":"none","data":[["1"],[2],[0.72],[10.78]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-262ee2b0cfc56a7340ed" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-262ee2b0cfc56a7340ed">{"x":{"filter":"none","data":[["1"],[2],[1.62],[10.88]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Gamma<\/th>\n      <th>Lower Bound<\/th>\n      <th>Upper Bound<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -1065,8 +1065,8 @@ To check that our pair matching procedure improves precsision, we compare the es
 </code></pre></div>
 
 ```{=html}
-<div id="htmlwidget-7547d40788c46e02269d" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7547d40788c46e02269d">{"x":{"filter":"none","data":[["1","2","3"],["NO2","O3","PM10"],[1.71,1.42,1.01],[1.18,1.99,0.99],[45,-29,2]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>S.E Pair Experiment<\/th>\n      <th>S.E Complete Experiment<\/th>\n      <th>Precision Improvement (%)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-47cd3a244ea542a428c1" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-47cd3a244ea542a428c1">{"x":{"filter":"none","data":[["1","2","3"],["NO2","O3","PM10"],[1.7,1.39,0.87],[1.18,2,0.98],[44,-30,-11]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>S.E Pair Experiment<\/th>\n      <th>S.E Complete Experiment<\/th>\n      <th>Precision Improvement (%)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
@@ -1230,8 +1230,8 @@ We display below the values of the point estimates and 95% confidence intervals:
 <div class="layout-chunk" data-layout="l-body-outset">
 
 ```{=html}
-<div id="htmlwidget-7b460edbd16c4deb3473" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-7b460edbd16c4deb3473">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12"],["NO2","NO2","NO2","O3","O3","O3","PM10","PM10","PM10","PM2.5","PM2.5","PM2.5"],[-1,0,1,-1,0,1,-1,0,1,-1,0,1],[0.5,-0.4,0.9,-0.7,-0.9,1.2,3.8,5.8,7.1,3,3.9,5.7],[0.2,-0.8,0.5,-1.2,-1.3,0.6,3.2,5.2,6.5,2.2,3.2,4.9],[0.9,-0.1,1.3,-0.2,-0.4,1.8,4.3,6.3,7.6,3.8,4.7,6.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Confidence Interval<\/th>\n      <th>Upper Bound of the 95% Confidence Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-88f377da48d4ac0fc7ff" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-88f377da48d4ac0fc7ff">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12"],["NO2","NO2","NO2","O3","O3","O3","PM10","PM10","PM10","PM2.5","PM2.5","PM2.5"],[-1,0,1,-1,0,1,-1,0,1,-1,0,1],[0.5,-0.5,0.8,-0.9,-0.9,1.1,3.9,5.5,7.4,2.8,4,5.7],[0.1,-0.9,0.4,-1.4,-1.4,0.6,3.4,5,6.9,2.1,3.3,5],[0.9,-0.2,1.2,-0.4,-0.5,1.7,4.5,6,8,3.6,4.7,6.4]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Pollutant<\/th>\n      <th>Time<\/th>\n      <th>Point Estimate<\/th>\n      <th>Lower Bound of the 95% Confidence Interval<\/th>\n      <th>Upper Bound of the 95% Confidence Interval<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 </div>
