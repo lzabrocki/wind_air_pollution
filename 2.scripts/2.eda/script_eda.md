@@ -329,8 +329,8 @@ We plot the distribution of rainfall duration by wind direction:
   <span class='fu'>mutate</span><span class='op'>(</span>
     rainfall_duration <span class='op'>=</span> <span class='fu'>case_when</span><span class='op'>(</span>
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"  0"</span> <span class='op'>~</span> <span class='st'>"0 minute"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[  1,  13)"</span> <span class='op'>~</span> <span class='st'>"[1, 13) minutes"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[ 13, 159)"</span> <span class='op'>~</span> <span class='st'>"[13, 159) minutes"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[  1,  12)"</span> <span class='op'>~</span> <span class='st'>"[1, 12) minutes"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[ 12, 159)"</span> <span class='op'>~</span> <span class='st'>"[12, 159) minutes"</span>,
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"[159,1440]"</span> <span class='op'>~</span> <span class='st'>"[159,1440] minutes"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
@@ -338,8 +338,8 @@ We plot the distribution of rainfall duration by wind direction:
     rainfall_duration <span class='op'>=</span> <span class='fu'>fct_relevel</span><span class='op'>(</span>
       <span class='va'>rainfall_duration</span>,
       <span class='st'>"0 minute"</span>,
-      <span class='st'>"[1, 13) minutes"</span>,
-      <span class='st'>"[13, 159) minutes"</span>,
+      <span class='st'>"[1, 12) minutes"</span>,
+      <span class='st'>"[12, 159) minutes"</span>,
       <span class='st'>"[159,1440] minutes"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>

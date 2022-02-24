@@ -318,8 +318,8 @@ graph_wd_rainfall <- data %>%
   mutate(
     rainfall_duration = case_when(
       rainfall_duration == "  0" ~ "0 minute",
-      rainfall_duration == "[  1,  13)" ~ "[1, 13) minutes",
-      rainfall_duration == "[ 13, 159)" ~ "[13, 159) minutes",
+      rainfall_duration == "[  1,  12)" ~ "[1, 12) minutes",
+      rainfall_duration == "[ 12, 159)" ~ "[12, 159) minutes",
       rainfall_duration == "[159,1440]" ~ "[159,1440] minutes"
     )
   ) %>%
@@ -327,8 +327,8 @@ graph_wd_rainfall <- data %>%
     rainfall_duration = fct_relevel(
       rainfall_duration,
       "0 minute",
-      "[1, 13) minutes",
-      "[13, 159) minutes",
+      "[1, 12) minutes",
+      "[12, 159) minutes",
       "[159,1440] minutes"
     )
   ) %>%

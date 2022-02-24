@@ -175,8 +175,8 @@ data_categorical_weather_variables <- data_all %>%
   mutate(
     rainfall_duration = case_when(
       rainfall_duration == "Rainfall Duration:   0" ~ "Rainfall Duration: 0 min",
-      rainfall_duration == "Rainfall Duration: [  1,  13)" ~ "Rainfall Duration: [1, 13) min",
-      rainfall_duration == "Rainfall Duration: [ 13, 159)" ~ "Rainfall Duration: [13, 159) min",
+      rainfall_duration == "Rainfall Duration: [  1,  12)" ~ "Rainfall Duration: [1, 12) min",
+      rainfall_duration == "Rainfall Duration: [ 12, 159)" ~ "Rainfall Duration: [12, 159) min",
       rainfall_duration == "Rainfall Duration: [159,1440]" ~ "Rainfall Duration: [159, 1440] min"
     )
   ) %>%

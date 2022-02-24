@@ -178,8 +178,8 @@ We plot the proportion of weather categorical variables for the two datasets
   <span class='fu'>mutate</span><span class='op'>(</span>
     rainfall_duration <span class='op'>=</span> <span class='fu'>case_when</span><span class='op'>(</span>
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration:   0"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: 0 min"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [  1,  13)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [1, 13) min"</span>,
-      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [ 13, 159)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [13, 159) min"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [  1,  12)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [1, 12) min"</span>,
+      <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [ 12, 159)"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [12, 159) min"</span>,
       <span class='va'>rainfall_duration</span> <span class='op'>==</span> <span class='st'>"Rainfall Duration: [159,1440]"</span> <span class='op'>~</span> <span class='st'>"Rainfall Duration: [159, 1440] min"</span>
     <span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span>
