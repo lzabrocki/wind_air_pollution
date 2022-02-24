@@ -764,7 +764,7 @@ We finally plot the distribution of standardized mean differences for continuous
 
 <span class='co'># create the graph</span>
 <span class='va'>graph_boxplot_categorical_balance_improvement</span> <span class='op'>&lt;-</span>
-  <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>data_weather_categorical</span>, <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>dataset</span>, y <span class='op'>=</span> <span class='va'>abs_difference</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>data_categorical_love</span>, <span class='fu'>aes</span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>dataset</span>, y <span class='op'>=</span> <span class='va'>abs_difference</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>ggbeeswarm</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/ggbeeswarm/man/geom_quasirandom.html'>geom_quasirandom</a></span><span class='op'>(</span>
     shape <span class='op'>=</span> <span class='fl'>16</span>,
     size <span class='op'>=</span> <span class='fl'>2</span>,
@@ -827,6 +827,36 @@ We combine the two previous plots:
 </code></pre></div>
 
 </div>
+
+
+
+And we compute the overall figures for imbalance before and after matching:
+
+<div class="layout-chunk" data-layout="l-body-outset">
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># compute average imbalance before and after matching</span>
+<span class='va'>data_categorical_love</span> <span class='op'>&lt;-</span> <span class='va'>data_categorical_love</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>Type <span class='op'>=</span> <span class='st'>"Categorical (Difference in Percentage Points)"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>rename</span><span class='op'>(</span>standardized_difference <span class='op'>=</span> <span class='va'>abs_difference</span><span class='op'>)</span>
+  
+<span class='va'>data_continuous_love</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>Type <span class='op'>=</span> <span class='st'>"Continuous (Standardized Difference)"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>bind_rows</span><span class='op'>(</span><span class='va'>data_categorical_love</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>Type</span>, <span class='va'>dataset</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>summarise</span><span class='op'>(</span>mean_imbalance <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>standardized_difference</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>rename</span><span class='op'>(</span>Dataset <span class='op'>=</span> <span class='va'>dataset</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='va'>.</span>, align <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"l"</span>, <span class='st'>"l"</span>, <span class='st'>"c"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre></div>
+
+
+|Type                                          |Dataset      | mean_imbalance |
+|:---------------------------------------------|:------------|:--------------:|
+|Categorical (Difference in Percentage Points) |Initial Data |      6.23      |
+|Categorical (Difference in Percentage Points) |Matched Data |      1.77      |
+|Continuous (Standardized Difference)          |Initial Data |      0.26      |
+|Continuous (Standardized Difference)          |Matched Data |      0.03      |
+
+</div>
+
 
 ```{.r .distill-force-highlighting-css}
 ```

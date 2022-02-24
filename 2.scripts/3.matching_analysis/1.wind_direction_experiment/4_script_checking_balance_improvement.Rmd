@@ -735,7 +735,7 @@ data_categorical_love <-
 
 # create the graph
 graph_boxplot_categorical_balance_improvement <-
-  ggplot(data_weather_categorical, aes(x = dataset, y = abs_difference)) +
+  ggplot(data_categorical_love, aes(x = dataset, y = abs_difference)) +
   ggbeeswarm::geom_quasirandom(
     shape = 16,
     size = 2,
@@ -793,3 +793,22 @@ ggsave(
   device = cairo_pdf
 )
 ```
+
+
+And we compute the overall figures for imbalance before and after matching:
+
+```{r}
+# compute average imbalance before and after matching
+data_categorical_love <- data_categorical_love %>%
+  mutate(Type = "Categorical (Difference in Percentage Points)") %>%
+  rename(standardized_difference = abs_difference)
+  
+data_continuous_love %>%
+  mutate(Type = "Continuous (Standardized Difference)") %>%
+  bind_rows(data_categorical_love) %>%
+  group_by(Type, dataset) %>%
+  summarise(mean_imbalance = round(mean(standardized_difference), 2)) %>%
+  rename(Dataset = dataset) %>%
+  knitr::kable(., align = c("l", "l", "c"))
+```
+
