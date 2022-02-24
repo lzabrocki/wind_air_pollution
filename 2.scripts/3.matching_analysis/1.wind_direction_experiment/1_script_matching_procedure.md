@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2022-02-23"
+date: "2022-02-24"
 output: 
     distill::distill_article:
       keep_md: true
@@ -364,7 +364,7 @@ For somes cases, several controls units were matched to a treatment unit. We use
 </div>
 
 
-The hypothetical experiment we set up had 912 treated units and 3106 control units. The matching procedure results in 270 matched treated units.
+The hypothetical experiment we set up had 912 treated units and 3106 control units. The matching procedure results in 271 matched treated units.
 
 We finally merge the `matched_pairs` with the `matching_matching_data` to retrieve covariates values for the matched pairs and save the data:
 
