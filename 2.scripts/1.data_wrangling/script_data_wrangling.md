@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2022-02-23"
+date: "2022-02-24"
 output: 
     distill::distill_article:
       keep_md: true
@@ -211,19 +211,43 @@ Merge all pollutants variables together:
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># merge pollutants</span>
 <span class='va'>data_pollutants</span> <span class='op'>&lt;-</span> <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>data_no2</span>, <span class='va'>data_o3</span>, by <span class='op'>=</span> <span class='st'>"date"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>.</span>, <span class='va'>data_pm10</span>, by <span class='op'>=</span> <span class='st'>"date"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>.</span>, <span class='va'>data_pm25</span>, by <span class='op'>=</span> <span class='st'>"date"</span><span class='op'>)</span>
+  <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>.</span>, <span class='va'>data_pm25</span>, by <span class='op'>=</span> <span class='st'>"date"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='co'># add date at the daily level</span>
+  <span class='fu'>mutate</span><span class='op'>(</span>date <span class='op'>=</span> <span class='fu'>str_sub</span><span class='op'>(</span><span class='va'>date</span>, <span class='fl'>1</span>, <span class='fl'>10</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://lubridate.tidyverse.org/reference/ymd.html'>ymd</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre></div>
 
 </div>
 
 
-Compute the average concentration for each day by pollutant:
+Compute the average concentration for each day by pollutant. We use the following procedure:
+
+* We compute a 2.5% trimmed mean to average the hourly concentrations at the daily level.
+* For days with more than 3 missing hourly concentrations, we set the daily mean to missing.
 
 <div class="layout-chunk" data-layout="l-body-outset">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='va'>data_pollutants</span> <span class='op'>&lt;-</span> <span class='va'>data_pollutants</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>mutate</span><span class='op'>(</span>date <span class='op'>=</span> <span class='fu'>str_sub</span><span class='op'>(</span><span class='va'>date</span>, <span class='fl'>1</span>, <span class='fl'>10</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://lubridate.tidyverse.org/reference/ymd.html'>ymd</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># compute number of missing values</span>
+<span class='va'>data_pollutants_missing</span> <span class='op'>&lt;-</span> <span class='va'>data_pollutants</span> <span class='op'>%&gt;%</span>
   <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>date</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>summarise_at</span><span class='op'>(</span><span class='fu'>vars</span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span>, <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span>
+  <span class='fu'>summarise_at</span><span class='op'>(</span><span class='fu'>vars</span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span>, <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_longer</span><span class='op'>(</span>
+    cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span>,
+    names_to <span class='op'>=</span> <span class='st'>"pollutant"</span>,
+    values_to <span class='op'>=</span> <span class='st'>"n_missing"</span>
+  <span class='op'>)</span>
+
+<span class='co'># compute daily averages</span>
+<span class='va'>data_pollutants</span> <span class='op'>&lt;-</span> <span class='va'>data_pollutants</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_longer</span><span class='op'>(</span>
+    cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>mean_no2_pa07</span><span class='op'>:</span><span class='va'>mean_pm25</span><span class='op'>)</span>,
+    names_to <span class='op'>=</span> <span class='st'>"pollutant"</span>,
+    values_to <span class='op'>=</span> <span class='st'>"concentration"</span>
+  <span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>.</span>, <span class='va'>data_pollutants_missing</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"date"</span>, <span class='st'>"pollutant"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>date</span>, <span class='va'>pollutant</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>summarise</span><span class='op'>(</span>daily_concentration <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>n_missing</span> <span class='op'>&lt;=</span> <span class='fl'>3</span>, <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>concentration</span>, trim <span class='op'>=</span>                                                              <span class='fl'>0.025</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='cn'>NA</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>date</span>, <span class='va'>pollutant</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>summarise</span><span class='op'>(</span>daily_concentration <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>daily_concentration</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>pivot_wider</span><span class='op'>(</span><span class='va'>.</span>, names_from <span class='op'>=</span> <span class='va'>pollutant</span>, values_from <span class='op'>=</span> <span class='va'>daily_concentration</span><span class='op'>)</span>
 </code></pre></div>
 
 </div>
@@ -406,14 +430,14 @@ We first display below the proportion (%) of missing values for each variable:
 
 |Variable            | Proportion Missing (%) |
 |:-------------------|:----------------------:|
-|mean_pm25           |          31.1          |
-|mean_pm10_pa18      |          16.9          |
-|mean_o3_pa18        |          16.6          |
-|mean_o3_pa13        |          14.4          |
-|mean_no2_pa13       |          11.9          |
-|mean_no2_pa07       |          11.7          |
-|mean_no2_pa18       |          11.6          |
-|mean_no2_pa12       |          11.4          |
+|mean_pm25           |          24.5          |
+|mean_pm10_pa18      |          9.1           |
+|mean_o3_pa18        |          5.2           |
+|mean_no2_pa12       |          4.4           |
+|mean_no2_pa18       |          4.3           |
+|mean_no2_pa13       |          4.2           |
+|mean_o3_pa13        |          3.7           |
+|mean_no2_pa07       |          2.8           |
 |rainfall_duration   |          2.5           |
 |wind_direction      |          0.6           |
 |wind_speed          |          0.6           |
@@ -618,6 +642,9 @@ Missing value imputation by random forests
 iter 1:	..
 iter 2:	..
 iter 3:	..
+iter 4:	..
+iter 5:	..
+iter 6:	..
 ```
 
 </div>
@@ -685,8 +712,8 @@ We see that the two distributions overlap relatively well. We also compute the m
 
 |Pollutant      | Absolute Difference | Root Mean Square Error | Mean Concentration | Standard Deviation |
 |:--------------|:-------------------:|:----------------------:|:------------------:|:------------------:|
-|mean_no2_pa12  |         3.3         |          4.2           |        36.4        |        14.4        |
-|mean_pm10_pa18 |         6.3         |          8.8           |        23.7        |        13.1        |
+|mean_no2_pa12  |         3.2         |          4.2           |        37.6        |        13.9        |
+|mean_pm10_pa18 |         6.1         |          9.1           |        23.4        |        12.3        |
 
 </div>
 
@@ -735,6 +762,7 @@ iter 2:	...........
 iter 3:	...........
 iter 4:	...........
 iter 5:	...........
+iter 6:	...........
 ```
 
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'># dirty fix for wind_direction imputed values equal to 370 </span>

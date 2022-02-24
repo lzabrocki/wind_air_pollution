@@ -203,16 +203,40 @@ Merge all pollutants variables together:
 # merge pollutants
 data_pollutants <- left_join(data_no2, data_o3, by = "date") %>%
   left_join(., data_pm10, by = "date") %>%
-  left_join(., data_pm25, by = "date")
+  left_join(., data_pm25, by = "date") %>%
+  # add date at the daily level
+  mutate(date = str_sub(date, 1, 10) %>% ymd(.))
 ```
 
-Compute the average concentration for each day by pollutant:
+Compute the average concentration for each day by pollutant. We use the following procedure:
+
+* We compute a 2.5% trimmed mean to average the hourly concentrations at the daily level.
+* For days with more than 3 missing hourly concentrations, we set the daily mean to missing.
 
 ```{r}
-data_pollutants <- data_pollutants %>%
-  mutate(date = str_sub(date, 1, 10) %>% ymd(.)) %>%
+# compute number of missing values
+data_pollutants_missing <- data_pollutants %>%
   group_by(date) %>%
-  summarise_at(vars(mean_no2_pa07:mean_pm25), ~ mean(.))
+  summarise_at(vars(mean_no2_pa07:mean_pm25), ~ sum(is.na(.))) %>%
+  pivot_longer(
+    cols = c(mean_no2_pa07:mean_pm25),
+    names_to = "pollutant",
+    values_to = "n_missing"
+  )
+
+# compute daily averages
+data_pollutants <- data_pollutants %>%
+  pivot_longer(
+    cols = c(mean_no2_pa07:mean_pm25),
+    names_to = "pollutant",
+    values_to = "concentration"
+  ) %>%
+  left_join(., data_pollutants_missing, by = c("date", "pollutant")) %>%
+  group_by(date, pollutant) %>%
+  summarise(daily_concentration = ifelse(n_missing <= 3, mean(concentration, trim =                                                              0.025, na.rm = TRUE), NA)) %>%
+  group_by(date, pollutant) %>%
+  summarise(daily_concentration = mean(daily_concentration)) %>%
+  pivot_wider(., names_from = pollutant, values_from = daily_concentration)
 ```
 
 # Cleaning Weather Data
@@ -305,7 +329,7 @@ dates_data <- dates_data %>%
 # create weekend dummy
 dates_data <- dates_data %>%
   mutate(weekend = ifelse(weekday %in% c("Saturday", "Sunday"), "Weekend", "Work Days") %>% as_factor(.))
-````
+```
 
 Then, we load two datasets on holidays and bank days indicators:
 
@@ -334,7 +358,7 @@ data_bank_days <-
   mutate(bank_day_dummy = ifelse(bank_day_dummy == "True", 1, 0)) %>%
   mutate(date = lubridate::ymd(date)) %>%
   filter(date >= "2008-01-01" & date <= "2018-12-31")
-```` 
+``` 
   
 We merge the three datasets together:
 
@@ -343,7 +367,7 @@ We merge the three datasets together:
 data_calendar <-
   left_join(dates_data, data_holidays, by = "date") %>%
   left_join(., data_bank_days, by = "date")
-```` 
+``` 
 
 # Merging All Datasets
 
@@ -352,7 +376,7 @@ We merge all datasets together:
 ```{r}
 data <- left_join(data_calendar, data_pollutants, by = "date") %>%
   left_join(., weather_data, by = "date")
-```` 
+``` 
 
 # Imputing Missing Values
 
@@ -372,7 +396,7 @@ data %>%
   summarise("Proportion Missing (%)" = round(sum(is.na(value)) / n() * 100, 1)) %>%
   arrange(-`Proportion Missing (%)`) %>%
   knitr::kable(., align = c("l", "c"))
-```` 
+``` 
 
 We see that all air pollutants have at least 10% of their observations missing. To better understand when values are missing, we plot below the distribution of the missing dummy for each variable over time:
 
@@ -407,7 +431,7 @@ ggsave(
   units = "cm",
   device = cairo_pdf
 )
-```` 
+``` 
 
 We can see that the station measuring PM$_{2.5}$ stopped twice recording concentrations over a long period of time. For the other pollutants, the stations stopped recording concentrations over much shorter periods. We will therefore not impute the missing values of PM$_{2.5}$ because they are missing over too long consecutive periods of days. 
 
@@ -443,7 +467,7 @@ ggsave(
   units = "cm",
   device = cairo_pdf
 )  
-```` 
+``` 
 
 We see that missing concentrations occur less on weekends. We make the same plot but by month:
 
@@ -476,7 +500,7 @@ ggsave(
   units = "cm",
   device = cairo_pdf
 )  
-````
+```
 
 We do not see a clear pattern of missingness depending on the month of year. Overall, missing values are not missing completely are random but we can use values from past and future periods and those coming from other stations to impute them.
 
@@ -543,7 +567,7 @@ data_test_imputed <- missRanger::missRanger(data_test_missing, mean_no2_pa12 + m
                                pmm.k = 10,
                                num.trees = 100,
                                seed = 42)
-```` 
+``` 
 
 We then compare the distribution of true and imputed concentrations for each air pollutant:
 
@@ -584,7 +608,7 @@ ggsave(
   units = "cm",
   device = cairo_pdf
 )  
-```` 
+``` 
 
 We see that the two distributions overlap relatively well. We also compute the mean absolute difference of concentrations for each pollutant:
 
@@ -599,7 +623,7 @@ data_imputation_comparison %>%
             "Standard Deviation" = sd(Observed)) %>%
   mutate_at(vars(-Pollutant), ~ round(., 1)) %>%
   knitr::kable(., align = c("l", "c", "c", "c", "c"))
-```` 
+``` 
 
 The absolute difference is small for NO$_{2}$ but high for PM$_{10}$. Of course, when many variables have a large fraction of missing values and missing values occurring on the same date, the algorithm could completely fail to correctly impute the values.
 
@@ -636,7 +660,7 @@ data <- missRanger::missRanger(
 # dirty fix for wind_direction imputed values equal to 370 
 data <- data %>%
   mutate(wind_direction = ifelse(wind_direction == 370, 10, wind_direction))
-```` 
+``` 
 
 # Last Cleaning Steps
 
@@ -661,7 +685,7 @@ data <- data %>%
         "(270,360]" = "North-West"
       )
   ) 
-```` 
+``` 
 
 We finally aggregate air pollutant concentrations at the city level:
 
@@ -675,7 +699,7 @@ data <- data %>%
   mean_o3 = mean(c(mean_o3_pa13, mean_o3_pa18)),
   mean_pm10 = mean_pm10_pa18) %>%
   ungroup()
-```` 
+``` 
 
 We finally select relevant variables and save the data:
 
@@ -702,7 +726,7 @@ data %>%
   ) %>%
   saveRDS(.,
           here::here("1.data", "4.data_for_analysis", "data_for_analysis.RDS"))
-```` 
+``` 
 
 
 
