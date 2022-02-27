@@ -505,7 +505,7 @@ ggsave(
 
 We draw love plots which display the standardized mean differences between treated and control days for each weather covariate and by month:
 
-```{r, fig.width=12, fig.height=4}
+```{r, fig.width=8, fig.height=6}
 # compute absolute differences
 data_abs_difference <- data %>%
   select(month,
@@ -560,7 +560,7 @@ graph_love <-
              color = my_orange,
              size = 0.3) +
   geom_point(size = 2, colour = my_blue) +
-  facet_wrap( ~ month, ncol = 6) +
+  facet_wrap( ~ month, ncol = 4) +
   xlab("Standardized Mean Differences") +
   ylab("") +
   theme_tufte() +
@@ -579,8 +579,8 @@ graph_love
 ggsave(
   graph_love,
   filename = here::here("3.outputs", "1.eda", "graph_love_weather.pdf"),
-  width = 28,
-  height = 9,
+  width = 20,
+  height = 12,
   units = "cm",
   device = cairo_pdf
 )

@@ -15,7 +15,7 @@ author:
     url: https://profiles.ucsd.edu/tarik.benmarhnia
     affiliation: UCSD & Scripps Institute
     affiliation_url: https://benmarhniaresearch.ucsd.edu/
-date: "2022-02-24"
+date: "2022-02-27"
 output: 
     distill::distill_article:
       keep_md: true
@@ -586,7 +586,7 @@ We draw love plots which display the standardized mean differences between treat
              color <span class='op'>=</span> <span class='va'>my_orange</span>,
              size <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>geom_point</span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, colour <span class='op'>=</span> <span class='va'>my_blue</span><span class='op'>)</span> <span class='op'>+</span>
-  <span class='fu'>facet_wrap</span><span class='op'>(</span> <span class='op'>~</span> <span class='va'>month</span>, ncol <span class='op'>=</span> <span class='fl'>6</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'>facet_wrap</span><span class='op'>(</span> <span class='op'>~</span> <span class='va'>month</span>, ncol <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>xlab</span><span class='op'>(</span><span class='st'>"Standardized Mean Differences"</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>ylab</span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'>theme_tufte</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
@@ -605,8 +605,8 @@ We draw love plots which display the standardized mean differences between treat
 <span class='fu'>ggsave</span><span class='op'>(</span>
   <span class='va'>graph_love</span>,
   filename <span class='op'>=</span> <span class='fu'>here</span><span class='fu'>::</span><span class='fu'><a href='https://here.r-lib.org//reference/here.html'>here</a></span><span class='op'>(</span><span class='st'>"3.outputs"</span>, <span class='st'>"1.eda"</span>, <span class='st'>"graph_love_weather.pdf"</span><span class='op'>)</span>,
-  width <span class='op'>=</span> <span class='fl'>28</span>,
-  height <span class='op'>=</span> <span class='fl'>9</span>,
+  width <span class='op'>=</span> <span class='fl'>20</span>,
+  height <span class='op'>=</span> <span class='fl'>12</span>,
   units <span class='op'>=</span> <span class='st'>"cm"</span>,
   device <span class='op'>=</span> <span class='va'>cairo_pdf</span>
 <span class='op'>)</span>
